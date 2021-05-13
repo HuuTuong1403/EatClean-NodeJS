@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/app_home"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:theme="@style/Theme.EatCleanApp.AppBarOverlay">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:backgroundTint="@android:color/transparent">
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/toolbar"
+                app:titleMarginStart="75dp"
+                android:layout_width="match_parent"
+                android:layout_height="45dp"
+                android:background="@color/gray"
+                app:titleTextColor="@color/black"
+                app:popupTheme="@style/Theme.EatCleanApp.PopupOverlay">
+            </androidx.appcompat.widget.Toolbar>
+
+            <TextView
+                android:id="@+id/txvTitleHome"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true"
+                android:textSize="21sp"
+                android:fontFamily="@font/robotomonoitalicvariablefont"
+                android:textAllCaps="true"
+                android:textColor="@color/black"
+                android:textStyle="bold"/>
+
+            <ImageButton
+                android:id="@+id/btnprofile"
+                android:layout_width="32dp"
+                android:background="@android:color/transparent"
+                android:layout_height="32dp"
+                android:visibility="invisible"
+                android:src="@drawable/user24"
+                android:layout_centerVertical="true"
+                android:layout_centerHorizontal="true"
+                android:layout_toLeftOf="@+id/searchbox"
+                android:layout_marginTop="12dp"
+                android:layout_marginRight="12dp"/>
+
+            <ImageButton
+                android:id="@+id/searchbox"
+                android:layout_width="28dp"
+                android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true"
+                android:background="@android:color/transparent"
+                android:layout_height="28dp"
+                android:src="@drawable/search24"
+                android:layout_marginTop="12dp"
+                android:layout_marginRight="12dp"
+                android:layout_alignParentRight="true"/>
+
+    </RelativeLayout>
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/app_bar_search"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="invisible"
+        android:theme="@style/Theme.EatCleanApp.AppBarOverlay">
+
+    <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbarSearch"
+            android:layout_width="match_parent"
+            android:layout_height="45dp"
+            android:background="@color/gray"
+            app:titleTextColor="@color/black"
+            app:popupTheme="@style/Theme.EatCleanApp.PopupOverlay">
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Bộ lọc"
+                    android:textAllCaps="true"
+                    android:textSize="20sp"
+                    android:layout_centerVertical="true"
+                    android:layout_alignParentRight="true"
+                    android:layout_marginTop="12dp"
+                    android:layout_marginRight="10dp"/>
+
+            </RelativeLayout>
+        </androidx.appcompat.widget.Toolbar>
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <include layout="@layout/content_main" />
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
