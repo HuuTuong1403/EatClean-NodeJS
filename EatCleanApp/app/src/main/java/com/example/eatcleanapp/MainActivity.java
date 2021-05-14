@@ -15,6 +15,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.eatcleanapp.ui.home.HomeFragment;
+import com.example.eatcleanapp.ui.home.detail.DetailActivity;
 import com.example.eatcleanapp.ui.home.signin.SignInFragment;
 import com.example.eatcleanapp.ui.quantrivien.AdminActivity;
 import com.google.android.material.appbar.AppBarLayout;
@@ -147,6 +148,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 break;
             }
             case R.id.nav_settings:{
+                Intent intent = new Intent(MainActivity.this, DetailActivity.class);
+                intent.putExtra("detail-back", 2);
+                startActivity(intent);
                 break;
             }
             default:

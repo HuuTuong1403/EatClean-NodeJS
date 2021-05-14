@@ -20,11 +20,11 @@ public class ViewPagerAdapterHome extends FragmentStatePagerAdapter {
     public Fragment getItem(int position) {
         switch(position){
             case 0:
-                return new BlogFragment();
-            case 1:
                 return new RecipesFragment();
-            default:
+            case 1:
                 return new BlogFragment();
+            default:
+                return new RecipesFragment();
         }
     }
 

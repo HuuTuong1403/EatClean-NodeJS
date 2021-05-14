@@ -1,28 +1,43 @@
 package com.example.eatcleanapp.model;
 
-public class users {
+
+import java.io.Serializable;
+
+public class users implements Serializable {
     private String IDUser;
     private String Email;
-    private String Phone;
     private String Password;
     private String FullName;
-    private String Gender;
     private String 	Image;
-    private int LoginFB;
+    private String LoginFB;
     private String IDRole;
+    private String Username;
+    public String getLoginFB() {
+        return LoginFB;
+    }
 
+    public void setLoginFB(String loginFB) {
+        LoginFB = loginFB;
+    }
 
-    public users(String IDUser, String email, String phone, String password,
-                 String fullName, String gender, String image, int loginFB, String IDRole) {
+    public String getUsername() {
+        return Username;
+    }
+
+    public void setUsername(String username) {
+        Username = username;
+    }
+
+    public users(String IDUser, String email, String password, String fullName, String image, String loginFB,
+                 String IDRole, String username) {
         this.IDUser = IDUser;
         Email = email;
-        Phone = phone;
         Password = password;
         FullName = fullName;
-        Gender = gender;
         Image = image;
         LoginFB = loginFB;
         this.IDRole = IDRole;
+        Username = username;
     }
 
     public String getIDUser() {
@@ -41,14 +56,6 @@ public class users {
         Email = email;
     }
 
-    public String getPhone() {
-        return Phone;
-    }
-
-    public void setPhone(String phone) {
-        Phone = phone;
-    }
-
     public String getPassword() {
         return Password;
     }
@@ -65,13 +72,6 @@ public class users {
         FullName = fullName;
     }
 
-    public String getGender() {
-        return Gender;
-    }
-
-    public void setGender(String gender) {
-        Gender = gender;
-    }
 
     public String getImage() {
         return Image;
@@ -81,13 +81,6 @@ public class users {
         Image = image;
     }
 
-    public int getLoginFB() {
-        return LoginFB;
-    }
-
-    public void setLoginFB(int loginFB) {
-        LoginFB = loginFB;
-    }
 
     public String getIDRole() {
         return IDRole;
@@ -96,4 +89,5 @@ public class users {
     public void setIDRole(String IDRole) {
         this.IDRole = IDRole;
     }
+
 }

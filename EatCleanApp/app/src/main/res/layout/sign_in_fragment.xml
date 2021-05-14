@@ -40,6 +40,7 @@
                         android:layout_width="match_parent"
                         android:textSize="20sp"
                         android:hint="@string/username"
+                        android:id="@+id/signin_edtEmail"
                         android:layout_height="match_parent"/>
                 </com.google.android.material.textfield.TextInputLayout>
 
@@ -56,6 +57,7 @@
                         android:inputType="textPassword"
                         android:textSize="20sp"
                         android:hint="@string/password"
+                        android:id="@+id/signin_edtPassword"
                         android:layout_height="match_parent"/>
                 </com.google.android.material.textfield.TextInputLayout>
 
@@ -65,6 +67,7 @@
                     android:layout_width="350dp"
                     android:padding="15dp"
                     android:text="@string/signin"
+                    android:id="@+id/signin_btnSignIn"
                     android:textSize="20sp"
                     app:cornerRadius="30dp"
                     android:backgroundTint="@color/orange"/>

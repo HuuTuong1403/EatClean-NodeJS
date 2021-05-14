@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:layout_marginTop="10dp"
+    android:layout_marginBottom="10dp"
     android:layout_marginEnd="10dp"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     app:cardCornerRadius="8dp">
@@ -12,11 +13,11 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <ImageView
+        <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/recipes_image"
             android:layout_width="match_parent"
             android:layout_height="130dp"
-            android:src="@drawable/imageheader"
+            android:src="@drawable/login"
             android:scaleType="centerCrop"/>
         <TextView
             android:id="@+id/recipes_name"
@@ -24,8 +25,26 @@
             android:layout_width="wrap_content"
             android:textColor="@color/black"
             android:textSize="16sp"
+            android:layout_marginTop="10dp"
+            android:fontFamily="@font/robotomonoregular"
+            android:layout_marginBottom="8dp"
             android:padding="6dp"
             android:text="@string/app_name"/>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="5dp"
+            android:layout_marginTop="5dp"
+            android:background="@drawable/diveder_dashed"
+            android:layout_marginBottom="5dp"/>
+        <TextView
+            android:id="@+id/recipes_author"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/black"
+            android:fontFamily="@font/robotomonoregular"
+            android:textSize="16sp"
+            android:padding="4dp"
+            android:text="Recipe by Huu Tuong"/>
     </LinearLayout>
 
 </androidx.cardview.widget.CardView>

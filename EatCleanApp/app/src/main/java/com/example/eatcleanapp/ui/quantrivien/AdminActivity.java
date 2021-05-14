@@ -15,12 +15,15 @@ import androidx.navigation.ui.NavigationUI;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.eatcleanapp.MainActivity;
 import com.example.eatcleanapp.R;
 import com.example.eatcleanapp.databinding.ActivityAdminBinding;
 import com.example.eatcleanapp.databinding.ActivityMainBinding;
+import com.example.eatcleanapp.model.users;
 import com.example.eatcleanapp.ui.home.HomeFragment;
 import com.example.eatcleanapp.ui.home.signin.SignInFragment;
 import com.example.eatcleanapp.ui.quantrivien.home.HomeAdminFragment;
@@ -32,13 +35,13 @@ public class AdminActivity extends AppCompatActivity implements NavigationView.O
 
     private ActivityAdminBinding binding;
     private TextView txvTitleAdmin;
-
     private static final int FRAGMENT_HOME = 1;
     private int currentFragment = FRAGMENT_HOME;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         binding = ActivityAdminBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         txvTitleAdmin = (TextView)findViewById(R.id.txvTitleAdmin);
@@ -50,17 +53,31 @@ public class AdminActivity extends AppCompatActivity implements NavigationView.O
         drawerLayout.addDrawerListener(toggle);
         toggle.syncState();
         navigationView.setNavigationItemSelectedListener(this);
-
-
         getSupportActionBar().setDisplayShowTitleEnabled(false);
         getSupportActionBar().setHomeButtonEnabled(true);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeAsUpIndicator(R.drawable.menu24);
-
+        /*Bundle bundleReceive = getIntent().getExtras();
+        if(bundleReceive != null){
+            users user = (users) bundleReceive.get("object_user");
+            if(user != null){
+                ChangeText(user);
+            }
+        }*/
         navigationView.getMenu().findItem(R.id.menu_home_nav_admin).setChecked(true);
         replaceFragment(new HomeAdminFragment(), "Trang chủ Admin");
         currentFragment = FRAGMENT_HOME;
     }
+
+    private void ChangeText(users user){
+        NavigationView navigationView   = (NavigationView)findViewById(R.id.nav_admin);
+        View headerView                 = navigationView.getHeaderView(0);
+        TextView txv_fullname           = (TextView)headerView.findViewById(R.id.user_fullname_admin);
+        TextView txv_email              = (TextView)headerView.findViewById(R.id.user_email_admin);
+        //txv_fullname.setText(user.getFullName());
+        //txv_email.setText(user.getEmail());
+    }
+
 
     @Override
     public void onBackPressed() {

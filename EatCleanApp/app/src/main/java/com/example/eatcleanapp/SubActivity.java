@@ -49,7 +49,6 @@ public class SubActivity extends AppCompatActivity {
         });
         Intent intent = getIntent();
         int id = intent.getIntExtra("fragment-back", 0);
-        navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_sub);
         NavGraph navGraph = navController.getNavInflater().inflate(R.navigation.nav_graph);
         switch(id){
             case 1: {

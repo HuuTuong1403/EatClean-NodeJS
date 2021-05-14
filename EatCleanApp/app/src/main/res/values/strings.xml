@@ -20,5 +20,5 @@
     <string name="signup"><u>Đăng ký</u></string>
     <string name="signin">Đăng nhập</string>
     <string name="forgot_password">Quên mật khẩu?</string>
-
+    <string name="title_activity_detail">DetailActivity</string>
 </resources>
