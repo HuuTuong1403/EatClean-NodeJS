@@ -1,13 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:scrollbars="horizontal"
+    android:fillViewport="true"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".ui.home.detail.recipes.DetailRecipesFragment">
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="Recipes Detail" />
 
-</FrameLayout>
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ImageView
+            android:id="@+id/imageee"
+            android:layout_width="wrap_content"
+            android:layout_height="150dp"
+            android:src="@drawable/background" />
+
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/tab_detail_recipes"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:tabSelectedTextColor="@color/red" />
+
+        <com.example.eatcleanapp.ui.home.detail.recipes.tabdetail.CustomViewPager
+            android:id="@+id/viewpager_detail_recipes"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </LinearLayout>
+
+
+</ScrollView>
