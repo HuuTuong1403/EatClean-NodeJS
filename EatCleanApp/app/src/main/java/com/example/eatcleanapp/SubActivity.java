@@ -1,15 +1,26 @@
 package com.example.eatcleanapp;
 
+import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.Rect;
 import android.os.Bundle;
 
+import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.snackbar.Snackbar;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
 import android.widget.TextView;
 
+import androidx.fragment.app.FragmentManager;
 import androidx.navigation.NavController;
 import androidx.navigation.NavGraph;
 import androidx.navigation.Navigation;
@@ -40,7 +51,6 @@ public class SubActivity extends AppCompatActivity {
 
         binding.toolbar.setNavigationIcon(R.drawable.back24);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
-
         binding.toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -52,22 +62,32 @@ public class SubActivity extends AppCompatActivity {
         NavGraph navGraph = navController.getNavInflater().inflate(R.navigation.nav_graph);
         switch(id){
             case 1: {
-                txvTitle.setText("Đăng ký");
+                setText("Đăng ký");
                 navGraph.setStartDestination(R.id.signup_fragment);
                 break;
             }
             case 2: {
-                txvTitle.setText("Quên mật khẩu");
+                setText("Quên mật khẩu");
                 navGraph.setStartDestination(R.id.forgot_pass_fragment);
                 break;
             }
             case 3: {
-                txvTitle.setText("Thông tin tài khoản");
+                setText("Thông tin tài khoản");
                 navGraph.setStartDestination(R.id.profile_fragment);
                 break;
             }
         }
         navController.setGraph(navGraph);
+    }
+
+    @Override
+    public void finish() {
+        super.finish();
+        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_right);
+    }
+
+    public void setText(String text){
+        txvTitle.setText(text);
     }
 
     @Override
@@ -81,5 +101,35 @@ public class SubActivity extends AppCompatActivity {
     public void onBackPressed() {
         super.onBackPressed();
         overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_right);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == this.RESULT_OK){
+            setResult(RESULT_OK, data);
+        }
+    }
+
+    public Animation getAnimButton(View v){
+        Animation animButton = AnimationUtils.loadAnimation(v.getContext(), R.anim.anim_scale);
+        return animButton;
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        if(ev.getAction() == MotionEvent.ACTION_DOWN){
+            View v = getCurrentFocus();
+            if(v instanceof EditText){
+                Rect outRect = new Rect();
+                v.getGlobalVisibleRect(outRect);
+                if(!outRect.contains((int)ev.getRawX(), (int)ev.getRawY())){
+                    v.clearFocus();
+                    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                }
+            }
+        }
+        return super.dispatchTouchEvent(ev);
     }
 }

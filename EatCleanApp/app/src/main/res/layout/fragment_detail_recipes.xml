@@ -13,23 +13,71 @@
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-
-        <ImageView
-            android:id="@+id/imageee"
+        <!--<RatingBar
             android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:numStars="5"
+            android:stepSize="0.5"
+            style="?android:attr/ratingBarStyleIndicator"
+            android:isIndicator="true"/>-->
+        
+        <com.makeramen.roundedimageview.RoundedImageView
+            android:id="@+id/image_detail_recipes"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="15dp"
+            android:layout_gravity="center"
+            android:scaleType="fitCenter"
+            android:layout_width="match_parent"
+            app:riv_corner_radius="20dip"
+            app:riv_border_color="@color/gray"
+            app:riv_mutate_background="true"
+            app:riv_border_width="5dp"
             android:layout_height="150dp"
             android:src="@drawable/background" />
+        <TextView
+            android:id="@+id/txv_show_title_recipes"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Title"
+            android:textColor="@color/black"
+            android:fontFamily="@font/robotomonoregular"
+            android:textSize="18sp"
+            android:gravity="center"
+            android:layout_marginBottom="10dp"/>
+        <TextView
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:id="@+id/txv_show_content_recipes"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Title"
+            android:textColor="@color/black"
+            android:fontFamily="@font/robotomonoregular"
+            android:textSize="15sp"
+            android:gravity="center"
+            android:layout_marginBottom="10dp"/>
 
-        <com.google.android.material.tabs.TabLayout
+        <com.example.eatcleanapp.ui.home.detail.recipes.tabdetail.TabLayoutCustom
             android:id="@+id/tab_detail_recipes"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            app:tabBackground="@color/gray"
+            app:tabTextColor="@color/black"
+            app:tabMode="scrollable"
+            app:tabIndicatorHeight="2dp"
+            app:tabIndicatorColor="@color/red"
             app:tabSelectedTextColor="@color/red" />
 
         <com.example.eatcleanapp.ui.home.detail.recipes.tabdetail.CustomViewPager
             android:id="@+id/viewpager_detail_recipes"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent" >
+
+            <RatingBar
+                android:id="@+id/ratingBar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </com.example.eatcleanapp.ui.home.detail.recipes.tabdetail.CustomViewPager>
     </LinearLayout>
 
 

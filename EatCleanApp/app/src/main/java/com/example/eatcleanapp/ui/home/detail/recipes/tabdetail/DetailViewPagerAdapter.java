@@ -9,6 +9,7 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentStatePagerAdapter;
 
 
+
 public class DetailViewPagerAdapter extends FragmentStatePagerAdapter {
 
     private int mCurrentPosition = -1;

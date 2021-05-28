@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:fillViewport="true"
+    android:scrollbars="horizontal"
+    android:layout_height="match_parent"
+    tools:context=".ui.home.profile.ProfileChangePassFragment">
+
+    <LinearLayout
+        android:layout_marginTop="20dp"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="20dp">
+        <TextView
+            android:layout_marginBottom="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="18sp"
+            android:text="Mật khẩu cũ"
+            android:textColor="@color/black"/>
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_marginBottom="10dp"
+            app:startIconDrawable="@drawable/ic_lock_24"
+            android:layout_height="wrap_content"
+            app:endIconMode="password_toggle"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/profileChangePass_edt_oldPassword"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPassword"
+                android:importantForAutofill="no"
+                android:fontFamily="@font/robotomonoregular"
+                android:textColorHint="@color/black"
+                android:textColor="@color/black"
+                android:hint="Mật khẩu cũ"
+                android:textSize="16sp"/>
+        </com.google.android.material.textfield.TextInputLayout>
+        <TextView
+            android:layout_marginBottom="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="18sp"
+            android:text="Mật khẩu mới"
+            android:textColor="@color/black"/>
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_marginBottom="10dp"
+            app:startIconDrawable="@drawable/ic_lock_24"
+            android:layout_height="wrap_content"
+            app:endIconMode="password_toggle"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/profileChangePass_edt_newPassword"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPassword"
+                android:importantForAutofill="no"
+                android:fontFamily="@font/robotomonoregular"
+                android:textColorHint="@color/black"
+                android:textColor="@color/black"
+                android:hint="Mật khẩu mới"
+                android:textSize="16sp"/>
+        </com.google.android.material.textfield.TextInputLayout>
+        <TextView
+            android:layout_marginBottom="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="18sp"
+            android:text="Nhập lại mật khẩu mới"
+            android:textColor="@color/black"/>
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_marginBottom="10dp"
+            app:startIconDrawable="@drawable/ic_lock_24"
+            android:layout_height="wrap_content"
+            app:endIconMode="password_toggle"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/profileChangePass_edt_newPasswordAgain"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:importantForAutofill="no"
+                android:inputType="textPassword"
+                android:fontFamily="@font/robotomonoregular"
+                android:textColorHint="@color/black"
+                android:textColor="@color/black"
+                android:hint="Nhập lại mật khẩu mới"
+                android:textSize="16sp"/>
+        </com.google.android.material.textfield.TextInputLayout>
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/profileChangePass_btn_changePass"
+            android:layout_marginTop="30dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Đổi mật khẩu"
+            android:layout_marginBottom="15dp"
+            android:textSize="16sp"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:textColor="@color/custom_color_text"
+            android:background="@drawable/custom_button"
+            android:backgroundTint="@color/bg_nav"/>
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/pprofileChangePass_btn_cancel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Hủy "
+            android:layout_marginBottom="10dp"
+            android:textSize="16sp"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:textColor="@color/custom_color_text"
+            android:background="@drawable/custom_button"
+            android:backgroundTint="@color/bg_nav"/>
+    </LinearLayout>
+
+</ScrollView>

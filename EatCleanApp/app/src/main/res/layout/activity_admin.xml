@@ -17,6 +17,7 @@
         android:id="@+id/nav_admin"
         app:itemIconTint="@color/custom_color_admin"
         app:itemTextColor="@color/custom_color_admin"
+        app:itemBackground="@color/custom_navigation_checked"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="start"

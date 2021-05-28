@@ -1,16 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_height="match_parent"
+    android:scrollbars="horizontal"
+    android:fillViewport="true"
     tools:context=".ui.home.signup.SignUpFragment"
     android:background="@drawable/background"
     android:id="@+id/backgroundSignUp">
 
     <LinearLayout
+        android:gravity="center"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:orientation="vertical">
         <LinearLayout
             android:layout_marginTop="20dp"
@@ -18,10 +21,7 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:background="@drawable/shadow_signup"
-            android:paddingRight="35dp"
-            android:paddingTop="35dp"
-            android:paddingBottom="35dp"
-            android:paddingLeft="38dp">
+            android:padding="50dp">
 
             <TextView
                 android:layout_marginTop="20dp"
@@ -128,6 +128,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Đăng ký"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="20dp"
                 android:id="@+id/signup_btnRegister"
                 android:textSize="16sp"
                 android:fontFamily="@font/robotomonobolditalic"
@@ -136,4 +138,4 @@
         </LinearLayout>
     </LinearLayout>
 
-</FrameLayout>
+</ScrollView>

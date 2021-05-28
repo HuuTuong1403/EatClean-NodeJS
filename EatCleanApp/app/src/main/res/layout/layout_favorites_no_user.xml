@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center">
+    <ImageView
+        android:layout_marginBottom="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:src="@drawable/favorites_empty_gray"/>
+    <TextView
+        android:layout_marginBottom="10dp"
+        android:text="Không có danh sách món ăn yêu thích"
+        android:textSize="18sp"
+        android:gravity="center"
+        android:textColor="#2E2E2E"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+    <TextView
+        android:id="@+id/favorite_txv_signIn_signUp"
+        android:layout_marginTop="10dp"
+        android:layout_marginStart="15dp"
+        android:layout_marginEnd="15dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="#FF9800"
+        android:textSize="18sp"
+        android:gravity="center"
+        android:text="Hãy đăng nhập hoặc đăng ký để có thể lưu món ăn yêu thích"/>
+</LinearLayout>

@@ -6,13 +6,16 @@ public class blogs {
     private String 	BlogAuthor;
     private String 	BlogContent;
     private String Time;
+    private String Status;
 
-    public blogs(String IDBlog, String blogTitle, String blogAuthor, String blogContent, String time) {
+    public blogs(String IDBlog, String blogTitle, String blogAuthor,
+                 String blogContent, String time, String status) {
         this.IDBlog = IDBlog;
         BlogTitle = blogTitle;
         BlogAuthor = blogAuthor;
         BlogContent = blogContent;
         Time = time;
+        Status = status;
     }
 
     public String getIDBlog() {
@@ -53,5 +56,13 @@ public class blogs {
 
     public void setTime(String time) {
         Time = time;
+    }
+
+    public String getStatus() {
+        return Status;
+    }
+
+    public void setStatus(String status) {
+        Status = status;
     }
 }

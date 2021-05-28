@@ -1,22 +1,21 @@
 package com.example.eatcleanapp.ui.home.signin;
 
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
-
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
-import androidx.navigation.NavController;
-import androidx.navigation.NavGraph;
-import androidx.navigation.Navigation;
 
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -26,10 +25,11 @@ import com.example.eatcleanapp.MainActivity;
 import com.example.eatcleanapp.R;
 
 import com.example.eatcleanapp.SubActivity;
-import com.example.eatcleanapp.databinding.SignInFragmentBinding;
+import com.example.eatcleanapp.databinding.ActivityMainBinding;
 import com.example.eatcleanapp.model.users;
 import com.example.eatcleanapp.ui.home.HomeFragment;
 
+import com.example.eatcleanapp.ui.nguoidung.data_local.DataLocalManager;
 import com.example.eatcleanapp.ui.quantrivien.AdminActivity;
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
@@ -58,27 +58,26 @@ import retrofit2.Callback;
 
 public class SignInFragment extends Fragment {
 
-    //private SignInViewModel mViewModel;
-    private SignInFragmentBinding binding;
     private View view;
     private LoginButton loginButton;
     private CallbackManager callbackManager;
     private TextView txvSignUp, txvForgotPass;
     private TextInputEditText edtEmail, edtPassword;
     private MaterialButton btnSignIn;
-    public static SignInFragment newInstance() {
-        return new SignInFragment();
-    }
     private List<users> userList = new ArrayList<>();
-    private users mUser;
+    private ImageButton searchBox;
+    private MainActivity mMainActivity;
+    
     @Override
     public View onCreateView(@NotNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         FacebookSdk.getApplicationContext();
+        mMainActivity = (MainActivity) getActivity();
         callbackManager = CallbackManager.Factory.create();
         view = inflater.inflate(R.layout.sign_in_fragment, container, false);
         loginButton();
         Mapping();
+        GetUsers();
         loginButton.setReadPermissions(Arrays.asList("public_profile", "email"));
         loginButton.setFragment(this);
         setLogin_Button();
@@ -89,7 +88,7 @@ public class SignInFragment extends Fragment {
                 Intent intent = new Intent(getActivity(), SubActivity.class);
                 intent.putExtra("fragment-back", 1);
                 startActivity(intent);
-                getActivity().overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_left);
+                mMainActivity.overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_left);
             }
         });
 
@@ -99,12 +98,67 @@ public class SignInFragment extends Fragment {
                 Intent intent = new Intent(view.getContext(), SubActivity.class);
                 intent.putExtra("fragment-back", 2);
                 startActivity(intent);
-                getActivity().overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_left);
+                mMainActivity.overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_left);
             }
         });
+
+        Animation anim = AnimationUtils.loadAnimation(view.getContext(), R.anim.anim_scale);
+        Handler handler = new Handler();
+
         btnSignIn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                v.startAnimation(anim);
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        String email = edtEmail.getText().toString().trim();
+                        String password = edtPassword.getText().toString().trim();
+                        boolean checkLogin = false;
+                        users userLogin = null;
+                        for (users user: userList
+                        ) {
+                            if ((email.equals(user.getEmail()) || (email.equals(user.getUsername()))) && password.equals(user.getPassword())){
+                                checkLogin = true;
+                                userLogin = user;
+                                break;
+                            }
+                        }
+                        if (checkLogin){
+                            switch(userLogin.getIDRole()){
+                                case "R001":{
+                                    DataLocalManager.setUser(userLogin);
+                                    Intent intent = new Intent(view.getContext(), AdminActivity.class);
+                                    Bundle bundle = new Bundle();
+                                    bundle.putSerializable("object_user", userLogin);
+                                    intent.putExtras(bundle);
+                                    startActivity(intent);
+                                    getActivity().finish();
+                                    break;
+                                }
+                                case "R002":{
+                                    break;
+                                }
+                                case "R003":{
+                                    DataLocalManager.setUser(userLogin);
+                                    HomeFragment homeFragment = new HomeFragment();
+                                    Bundle bundle = new Bundle();
+                                    searchBox.setVisibility(View.VISIBLE);
+                                    bundle.putSerializable("object_user", userLogin);
+                                    homeFragment.setArguments(bundle);
+                                    mMainActivity.replaceFragment(homeFragment, "Trang chủ");
+                                    mMainActivity.setCurrentFragment(1);
+                                    NavigationView naview = mMainActivity.findViewById(R.id.nav_view);
+                                    naview.getMenu().findItem(R.id.nav_home).setChecked(true);
+                                    break;
+                                }
+                            }
+                        }
+                        else{
+                            Toast.makeText(view.getContext(), "Thông tin đăng nhập không đúng", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                }, 400);
             }
         });
         return view;
@@ -128,8 +182,9 @@ public class SignInFragment extends Fragment {
 
             }
         });
-
     }
+
+
 
     private void setLogin_Button() {
         loginButton.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
@@ -142,8 +197,8 @@ public class SignInFragment extends Fragment {
                 bundle.putInt("isloggin", 1);
                 homeFragment.setArguments(bundle);
 
-                ((MainActivity)getActivity()).replaceFragment(homeFragment, "Trang chủ");
-                NavigationView naview = getActivity().findViewById(R.id.nav_view);
+                mMainActivity.replaceFragment(homeFragment, "Trang chủ");
+                NavigationView naview = mMainActivity.findViewById(R.id.nav_view);
                 naview.getMenu().findItem(R.id.nav_home).setChecked(true);
             }
 
@@ -173,13 +228,6 @@ public class SignInFragment extends Fragment {
     }
 
     @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        //mViewModel = new ViewModelProvider(this).get(SignInViewModel.class);
-
-    }
-
-    @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         callbackManager.onActivityResult(requestCode, resultCode, data);
         super.onActivityResult(requestCode, resultCode, data);
@@ -192,6 +240,7 @@ public class SignInFragment extends Fragment {
         edtEmail = (TextInputEditText) view.findViewById(R.id.signin_edtEmail);
         edtPassword = (TextInputEditText) view.findViewById(R.id.signin_edtPassword);
         btnSignIn = (MaterialButton) view.findViewById(R.id.signin_btnSignIn);
+        searchBox = (ImageButton)mMainActivity.findViewById(R.id.searchBox);
     }
 
     @Override
@@ -200,17 +249,17 @@ public class SignInFragment extends Fragment {
         super.onStart();
     }
 
-    /*public void GetUsers(){
+    public void GetUsers(){
         APIService.apiService.getUser().enqueue(new Callback<List<users>>() {
             @Override
-            public void onResponse(Call<List<users>> call, retrofit2.Response<List<users>> response) {
+            public void onResponse(@NotNull Call<List<users>> call, @NotNull retrofit2.Response<List<users>> response) {
                 userList = response.body();
             }
 
             @Override
-            public void onFailure(Call<List<users>> call, Throwable t) {
+            public void onFailure(@NotNull Call<List<users>> call, @NotNull Throwable t) {
                 Toast.makeText(view.getContext(), t.toString(), Toast.LENGTH_SHORT).show();
             }
         });
-    }*/
+    }
 }

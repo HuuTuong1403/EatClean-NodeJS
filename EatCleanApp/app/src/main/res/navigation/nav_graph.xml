@@ -19,11 +19,59 @@
         tools:layout="@layout/fragment_forgot_password">
     </fragment>
 
+
+    <!--Change Profile-->
     <fragment
         android:id="@+id/profile_fragment"
         android:name="com.example.eatcleanapp.ui.home.profile.ProfileFragment"
         android:label="Thông tin tài khoản"
         tools:layout="@layout/fragment_profile">
+        <action
+            android:id="@+id/action_profile_fragment_to_profile_edit_fragment"
+            app:destination="@+id/profile_edit_fragment"
+            app:enterAnim="@anim/slide_in_left"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_right"
+            app:popExitAnim="@anim/slide_out_right" />
+        <action
+            android:id="@+id/action_profile_fragment_to_profile_changePass_fragment"
+            app:destination="@+id/profile_change_pass_fragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_right"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_left" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/profile_edit_fragment"
+        android:name="com.example.eatcleanapp.ui.home.profile.ProfileEditFragment"
+        tools:layout="@layout/fragment_profile_edit">
+        <action
+            android:id="@+id/action_profile_edit_fragment_to_profile_fragment"
+            app:destination="@+id/profile_fragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_right"
+            app:popEnterAnim="@anim/slide_in_right"
+            app:popExitAnim="@anim/slide_out_right"
+            app:launchSingleTop="true"
+            app:popUpTo="@id/profile_edit_fragment"
+            app:popUpToInclusive="true"/>
+    </fragment>
+
+    <fragment
+        android:id="@+id/profile_change_pass_fragment"
+        android:name="com.example.eatcleanapp.ui.home.profile.ProfileChangePassFragment"
+        tools:layout="@layout/fragment_profile_change_pass">
+        <action
+            android:id="@+id/action_profile_changePass_fragment_to_profile_fragment"
+            app:destination="@id/profile_fragment"
+            app:enterAnim="@anim/slide_in_left"
+            app:exitAnim="@anim/slide_out_left"
+            app:launchSingleTop="true"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_left"
+            app:popUpTo="@id/profile_change_pass_fragment"
+            app:popUpToInclusive="true" />
     </fragment>
 
 </navigation>

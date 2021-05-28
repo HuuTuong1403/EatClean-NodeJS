@@ -3,12 +3,17 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/orange"
     tools:context=".ui.home.detail.recipes.tabdetail.TabDetailIngredientsFragment">
 
     <TextView
+        android:id="@+id/txv_detail_ingredients"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:textColor="@color/black"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginTop="10dp"
+        android:textSize="18sp"
         android:text="Tab Ingredients" />
 
 </FrameLayout>

@@ -3,12 +3,14 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
+    tools:showIn="@layout/app_bar_main"
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/app_home"
         android:layout_width="match_parent"
+        android:visibility="visible"
         android:layout_height="wrap_content"
         android:theme="@style/Theme.EatCleanApp.AppBarOverlay">
 
@@ -32,14 +34,14 @@
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
                 android:layout_centerVertical="true"
-                android:textSize="21sp"
+                android:textSize="16sp"
                 android:fontFamily="@font/robotomonoitalicvariablefont"
                 android:textAllCaps="true"
                 android:textColor="@color/black"
                 android:textStyle="bold"/>
 
             <ImageButton
-                android:id="@+id/btnprofile"
+                android:id="@+id/btnProfile"
                 android:layout_width="32dp"
                 android:background="@android:color/transparent"
                 android:layout_height="32dp"
@@ -47,12 +49,13 @@
                 android:src="@drawable/user24"
                 android:layout_centerVertical="true"
                 android:layout_centerHorizontal="true"
-                android:layout_toLeftOf="@+id/searchbox"
+                android:layout_toStartOf="@+id/searchBox"
                 android:layout_marginTop="12dp"
-                android:layout_marginRight="12dp"/>
+                android:layout_marginEnd="12dp"
+                tools:ignore="ContentDescription" />
 
             <ImageButton
-                android:id="@+id/searchbox"
+                android:id="@+id/searchBox"
                 android:layout_width="28dp"
                 android:layout_centerHorizontal="true"
                 android:layout_centerVertical="true"
@@ -60,8 +63,9 @@
                 android:layout_height="28dp"
                 android:src="@drawable/search24"
                 android:layout_marginTop="12dp"
-                android:layout_marginRight="12dp"
-                android:layout_alignParentRight="true"/>
+                android:layout_marginEnd="12dp"
+                android:layout_alignParentEnd="true"
+                tools:ignore="ContentDescription" />
 
     </RelativeLayout>
     </com.google.android.material.appbar.AppBarLayout>
@@ -73,6 +77,7 @@
         android:visibility="invisible"
         android:theme="@style/Theme.EatCleanApp.AppBarOverlay">
 
+
     <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbarSearch"
             android:layout_width="match_parent"
@@ -81,19 +86,36 @@
             app:titleTextColor="@color/black"
             app:popupTheme="@style/Theme.EatCleanApp.PopupOverlay">
             <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:imeOptions="actionSearch"
+                    android:textColor="@color/black"
+                    android:layout_toStartOf="@+id/filter"
+                    android:hint="Search..."
+                    android:background="@android:color/transparent"
+                    android:singleLine="true"
+                    android:drawableStart="@drawable/outline_search_24"
+                    android:drawableTint="@color/black"
+                    android:drawablePadding="15dp"
+                    android:textColorHint="@color/black"
+                    android:layout_marginEnd="10dp"
+                    android:id="@+id/edt_search_recycler"
+                    android:layout_width="match_parent"
+                    android:textSize="18sp"
+                    android:layout_height="45dp"/>
 
                 <TextView
+                    android:id="@+id/filter"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Bộ lọc"
+                    android:text="@string/filter"
                     android:textAllCaps="true"
-                    android:textSize="20sp"
+                    android:textSize="16sp"
                     android:layout_centerVertical="true"
-                    android:layout_alignParentRight="true"
+                    android:layout_alignParentEnd="true"
                     android:layout_marginTop="12dp"
-                    android:layout_marginRight="10dp"/>
+                    android:layout_marginEnd="10dp"/>
 
             </RelativeLayout>
         </androidx.appcompat.widget.Toolbar>

@@ -13,4 +13,5 @@
     <color name="gray">#E3E0E0</color>
     <color name="blue">#0045FE</color>
     <color name="red">#F44336</color>
+    <color name="gray_empty_favorites">#C6BDBD</color>
 </resources>

@@ -21,4 +21,10 @@
     <string name="signin">Đăng nhập</string>
     <string name="forgot_password">Quên mật khẩu?</string>
     <string name="title_activity_detail">DetailActivity</string>
+    <string name="filter">Bộ lọc</string>
+    <string name="request_permissions"><b>Eat Clean</b> muốn truy cập vào máy ảnh của bạn để có thể đăng tải hình ảnh.</string>
+    <string name="yes">Đồng ý</string>
+    <string name="no">Không</string>
+    <string name="cancel">Hủy</string>
+    <string name="favorite">Yêu thích</string>
 </resources>

@@ -1,6 +1,8 @@
 package com.example.eatcleanapp.model;
 
-public class recipes {
+import java.io.Serializable;
+
+public class recipes implements Serializable {
     private String IDRecipes;
     private String RecipesTitle;
     private String RecipesAuthor;
@@ -9,10 +11,13 @@ public class recipes {
     private String Ingredients;
     private String 	Steps;
     private String Time;
+    private String Status;
+    private String Image;
+
 
     public recipes(String IDRecipes, String recipesTitle, String recipesAuthor,
                    String recipesContent, String nutritionalIngredients, String ingredients,
-                   String steps, String time) {
+                   String steps, String time, String status, String image) {
         this.IDRecipes = IDRecipes;
         RecipesTitle = recipesTitle;
         RecipesAuthor = recipesAuthor;
@@ -21,6 +26,8 @@ public class recipes {
         Ingredients = ingredients;
         Steps = steps;
         Time = time;
+        Status = status;
+        Image = image;
     }
 
     public String getIDRecipes() {
@@ -85,5 +92,20 @@ public class recipes {
 
     public void setTime(String time) {
         Time = time;
+    }
+
+    public String getStatus() {
+        return Status;
+    }
+
+    public void setStatus(String status) {
+        Status = status;
+    }
+    public String getImage() {
+        return Image;
+    }
+
+    public void setImage(String image) {
+        Image = image;
     }
 }

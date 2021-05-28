@@ -8,7 +8,7 @@ public class users implements Serializable {
     private String Email;
     private String Password;
     private String FullName;
-    private String 	Image;
+    private String Image;
     private String LoginFB;
     private String IDRole;
     private String Username;
@@ -90,4 +90,17 @@ public class users implements Serializable {
         this.IDRole = IDRole;
     }
 
+    @Override
+    public String toString() {
+        return "users{" +
+                "IDUser='" + IDUser + '\'' +
+                ", Email='" + Email + '\'' +
+                ", Password='" + Password + '\'' +
+                ", FullName='" + FullName + '\'' +
+                ", Image='" + Image + '\'' +
+                ", LoginFB='" + LoginFB + '\'' +
+                ", IDRole='" + IDRole + '\'' +
+                ", Username='" + Username + '\'' +
+                '}';
+    }
 }
