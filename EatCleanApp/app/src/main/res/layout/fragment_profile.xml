@@ -121,6 +121,14 @@
                     android:textColor="@color/black"
                     android:textSize="18sp"
                     android:text="Họ và tên: Nguyễn Hữu Tường"/>
+                <TextView
+                    android:id="@+id/txv_profile_SDT"
+                    android:layout_marginBottom="12dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/black"
+                    android:textSize="18sp"
+                    android:text="Số điện thoại: 0333123123"/>
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
