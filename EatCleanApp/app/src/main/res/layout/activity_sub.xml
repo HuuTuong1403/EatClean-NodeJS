@@ -7,33 +7,39 @@
     tools:context=".SubActivity">
 
     <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:theme="@style/Theme.EatCleanApp.AppBarOverlay">
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
-            android:foreground="@drawable/custom_button"
             android:layout_width="match_parent"
             android:layout_height="45dp"
             android:background="@color/gray"
-            app:titleTextColor="@color/black"
-            app:popupTheme="@style/Theme.EatCleanApp.PopupOverlay" >
+            android:foreground="@drawable/custom_button"
+            app:popupTheme="@style/Theme.EatCleanApp.PopupOverlay"
+            app:titleTextColor="@color/black">
+
             <TextView
-                android:layout_height="wrap_content"
+                android:id="@+id/txvTitle"
                 android:layout_width="match_parent"
-                android:textSize="16sp"
+                android:layout_height="wrap_content"
                 android:layout_marginRight="40dp"
-                android:textAllCaps="true"
                 android:fontFamily="@font/robotomonoitalicvariablefont"
-                android:textColor="@color/black"
                 android:gravity="center"
-                android:textStyle="bold"
-                android:id="@+id/txvTitle"/>
+                android:textAllCaps="true"
+                android:textColor="@color/black"
+                android:textSize="16sp"
+                android:textStyle="bold" />
         </androidx.appcompat.widget.Toolbar>
 
 
     </com.google.android.material.appbar.AppBarLayout>
-    <include layout="@layout/content_sub" />
+
+    <include
+        layout="@layout/content_sub"
+        app:layout_anchor="@+id/appBarLayout"
+        app:layout_anchorGravity="start|bottom" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
