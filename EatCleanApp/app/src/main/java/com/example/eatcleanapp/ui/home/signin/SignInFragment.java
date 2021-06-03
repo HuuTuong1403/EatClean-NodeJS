@@ -1,34 +1,26 @@
 package com.example.eatcleanapp.ui.home.signin;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-
-import androidx.fragment.app.Fragment;
-
 import android.os.Handler;
+import android.os.StrictMode;
 import android.util.Log;
 import android.view.LayoutInflater;
-
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.fragment.app.Fragment;
 
-import com.example.eatcleanapp.API.APIService;
 import com.example.eatcleanapp.MainActivity;
 import com.example.eatcleanapp.R;
-
 import com.example.eatcleanapp.SubActivity;
-import com.example.eatcleanapp.databinding.ActivityMainBinding;
 import com.example.eatcleanapp.model.users;
 import com.example.eatcleanapp.ui.home.HomeFragment;
-
 import com.example.eatcleanapp.ui.nguoidung.data_local.DataLocalManager;
 import com.example.eatcleanapp.ui.quantrivien.AdminActivity;
 import com.facebook.AccessToken;
@@ -44,17 +36,21 @@ import com.facebook.login.widget.LoginButton;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.gson.Gson;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
+import java.io.IOException;
 import java.util.Arrays;
-import java.util.List;
 
-import retrofit2.Call;
-import retrofit2.Callback;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 public class SignInFragment extends Fragment {
 
@@ -64,10 +60,10 @@ public class SignInFragment extends Fragment {
     private TextView txvSignUp, txvForgotPass;
     private TextInputEditText edtEmail, edtPassword;
     private MaterialButton btnSignIn;
-    private List<users> userList = new ArrayList<>();
     private ImageButton searchBox;
     private MainActivity mMainActivity;
-    
+    private users userLogin;
+    private boolean checkLogin = false;
     @Override
     public View onCreateView(@NotNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
@@ -77,7 +73,8 @@ public class SignInFragment extends Fragment {
         view = inflater.inflate(R.layout.sign_in_fragment, container, false);
         loginButton();
         Mapping();
-        GetUsers();
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy((policy));
         loginButton.setReadPermissions(Arrays.asList("public_profile", "email"));
         loginButton.setFragment(this);
         setLogin_Button();
@@ -112,21 +109,10 @@ public class SignInFragment extends Fragment {
                 handler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        String email = edtEmail.getText().toString().trim();
-                        String password = edtPassword.getText().toString().trim();
-                        boolean checkLogin = false;
-                        users userLogin = null;
-                        for (users user: userList
-                        ) {
-                            if ((email.equals(user.getEmail()) || (email.equals(user.getUsername()))) && password.equals(user.getPassword())){
-                                checkLogin = true;
-                                userLogin = user;
-                                break;
-                            }
-                        }
+                        SignIn();
                         if (checkLogin){
                             switch(userLogin.getIDRole()){
-                                case "R001":{
+                                case "609d2d54fee09d75f011158d":{
                                     DataLocalManager.setUser(userLogin);
                                     Intent intent = new Intent(view.getContext(), AdminActivity.class);
                                     Bundle bundle = new Bundle();
@@ -136,10 +122,10 @@ public class SignInFragment extends Fragment {
                                     getActivity().finish();
                                     break;
                                 }
-                                case "R002":{
+                                case "609d2d03fee09d75f011158c":{
                                     break;
                                 }
-                                case "R003":{
+                                case "609d2ceafee09d75f011158b":{
                                     DataLocalManager.setUser(userLogin);
                                     HomeFragment homeFragment = new HomeFragment();
                                     Bundle bundle = new Bundle();
@@ -248,18 +234,39 @@ public class SignInFragment extends Fragment {
         LoginManager.getInstance().logOut();
         super.onStart();
     }
-
-    public void GetUsers(){
-        APIService.apiService.getUser().enqueue(new Callback<List<users>>() {
-            @Override
-            public void onResponse(@NotNull Call<List<users>> call, @NotNull retrofit2.Response<List<users>> response) {
-                userList = response.body();
+    private void SignIn (){
+        OkHttpClient client = new OkHttpClient().newBuilder()
+                .build();
+        MediaType mediaType = MediaType.parse("application/json");
+        JSONObject jsonSignIn = new JSONObject();
+        try {
+            jsonSignIn.put("Username", edtEmail.getText().toString().trim());
+            jsonSignIn.put("Password", edtPassword.getText().toString().trim());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        RequestBody body = RequestBody.create(mediaType, jsonSignIn.toString());
+        Request request = new Request.Builder()
+                .url("https://eat-clean-nhom04.herokuapp.com/user/login")
+                .method("POST", body)
+                .build();
+        try {
+            Response response = client.newCall(request).execute();
+            String jsonData = response.body().string();
+            JSONObject Jobject = new JSONObject(jsonData);
+            if (response.isSuccessful()){
+                JSONObject data = Jobject.getJSONObject("data");
+                Gson g = new Gson();
+                userLogin = g.fromJson(String.valueOf(data), users.class);
+                checkLogin = true;
             }
-
-            @Override
-            public void onFailure(@NotNull Call<List<users>> call, @NotNull Throwable t) {
-                Toast.makeText(view.getContext(), t.toString(), Toast.LENGTH_SHORT).show();
+            else {
+                JSONObject error = Jobject.getJSONObject("error");
+                Toast.makeText(view.getContext(),  error.toString() , Toast.LENGTH_LONG).show();
             }
-        });
+        } catch (IOException | JSONException e) {
+            Toast.makeText(view.getContext(),  e.toString() , Toast.LENGTH_LONG).show();
+        }
     }
+
 }

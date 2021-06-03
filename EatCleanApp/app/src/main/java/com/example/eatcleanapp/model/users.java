@@ -5,39 +5,36 @@ import java.io.Serializable;
 
 public class users implements Serializable {
     private String IDUser;
+    private String Username;
     private String Email;
     private String Password;
     private String FullName;
-    private String Image;
+    private String 	Image;
     private String LoginFB;
     private String IDRole;
-    private String Username;
-    public String getLoginFB() {
-        return LoginFB;
+    private String Status;
+    private String Token;
+
+    public String getToken() {
+        return Token;
     }
 
-    public void setLoginFB(String loginFB) {
-        LoginFB = loginFB;
+    public void setToken(String token) {
+        Token = token;
     }
 
-    public String getUsername() {
-        return Username;
-    }
-
-    public void setUsername(String username) {
-        Username = username;
-    }
-
-    public users(String IDUser, String email, String password, String fullName, String image, String loginFB,
-                 String IDRole, String username) {
+    public users(String IDUser, String username, String email, String password,
+                 String fullName, String image, String loginFB, String IDRole, String status, String token) {
         this.IDUser = IDUser;
+        Username = username;
         Email = email;
         Password = password;
         FullName = fullName;
         Image = image;
         LoginFB = loginFB;
         this.IDRole = IDRole;
-        Username = username;
+        Status = status;
+        Token = token;
     }
 
     public String getIDUser() {
@@ -46,6 +43,14 @@ public class users implements Serializable {
 
     public void setIDUser(String IDUser) {
         this.IDUser = IDUser;
+    }
+
+    public String getUsername() {
+        return Username;
+    }
+
+    public void setUsername(String username) {
+        Username = username;
     }
 
     public String getEmail() {
@@ -72,7 +77,6 @@ public class users implements Serializable {
         FullName = fullName;
     }
 
-
     public String getImage() {
         return Image;
     }
@@ -81,6 +85,13 @@ public class users implements Serializable {
         Image = image;
     }
 
+    public String getLoginFB() {
+        return LoginFB;
+    }
+
+    public void setLoginFB(String loginFB) {
+        LoginFB = loginFB;
+    }
 
     public String getIDRole() {
         return IDRole;
@@ -90,17 +101,11 @@ public class users implements Serializable {
         this.IDRole = IDRole;
     }
 
-    @Override
-    public String toString() {
-        return "users{" +
-                "IDUser='" + IDUser + '\'' +
-                ", Email='" + Email + '\'' +
-                ", Password='" + Password + '\'' +
-                ", FullName='" + FullName + '\'' +
-                ", Image='" + Image + '\'' +
-                ", LoginFB='" + LoginFB + '\'' +
-                ", IDRole='" + IDRole + '\'' +
-                ", Username='" + Username + '\'' +
-                '}';
+    public String getStatus() {
+        return Status;
+    }
+
+    public void setStatus(String status) {
+        Status = status;
     }
 }

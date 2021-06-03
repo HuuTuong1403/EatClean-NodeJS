@@ -1,7 +1,10 @@
 package com.example.eatcleanapp.ui.home.profile;
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.Dialog;
+import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -14,12 +17,15 @@ import android.os.Bundle;
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.fragment.NavHostFragment;
 
+import android.os.Environment;
 import android.os.Handler;
 import android.provider.MediaStore;
 import android.provider.Settings;
+import android.util.Base64;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -30,13 +36,19 @@ import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+import com.example.eatcleanapp.API.APIService;
+import com.example.eatcleanapp.BuildConfig;
 import com.example.eatcleanapp.MainActivity;
 import com.example.eatcleanapp.R;
+import com.example.eatcleanapp.RealPathUtil;
 import com.example.eatcleanapp.SubActivity;
 import com.example.eatcleanapp.model.users;
+import com.example.eatcleanapp.ui.home.LoadingDialog;
 import com.example.eatcleanapp.ui.nguoidung.data_local.DataLocalManager;
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.MultiplePermissionsReport;
@@ -48,19 +60,31 @@ import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class ProfileFragment extends Fragment {
 
     private View view;
     private SubActivity mSubActivity;
-    private Button btn_profile_edit, btn_profile_changePass, btn_add_avatar;
+    private Button btn_profile_edit, btn_profile_changePass, btn_add_avatar, btn_save_avatar;
     private Toolbar toolbar;
     private CircleImageView imageView_avatar_user;
     private users user;
     private TextView txv_profile_userName, txv_profile_email, txv_profile_fullName, txv_profile_title_fullName;
+    private Uri mUri;
+    private LoadingDialog loadingDialog;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -82,6 +106,7 @@ public class ProfileFragment extends Fragment {
         txv_profile_email.setText("Email: " + user.getEmail());
         txv_profile_fullName.setText("Họ và tên: " + user.getFullName());
         txv_profile_title_fullName.setText(user.getFullName());
+        Glide.with(view).load(user.getImage()).placeholder(R.drawable.gray).into(imageView_avatar_user);
 
         Animation animButton = mSubActivity.getAnimButton(view);
         Handler handler = new Handler();
@@ -140,7 +165,46 @@ public class ProfileFragment extends Fragment {
                 }, 400);
             }
         });
+
+        btn_save_avatar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                v.startAnimation(animButton);
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        if(mUri != null){
+                            loadingDialog.startLoadingDialog();
+                            UploadAvatar(user.getIDUser());
+                        }
+                    }
+                },400);
+            }
+        });
+
         return view;
+    }
+
+    private void UploadAvatar(String IDUser){
+        String strRealPath = RealPathUtil.getRealPath(view.getContext(), mUri);
+        Log.e("AAA", strRealPath);
+        File file = new File(strRealPath);
+        RequestBody requestBodyAvatar = RequestBody.create(MediaType.parse("multipart/form-data"), file);
+        MultipartBody.Part multipartBodyAvatar = MultipartBody.Part.createFormData("fileToUpload", file.getName(), requestBodyAvatar);
+
+        APIService.apiService.uploadImage(IDUser, multipartBodyAvatar).enqueue(new Callback<users>() {
+            @Override
+            public void onResponse(Call<users> call, Response<users> response) {
+                loadingDialog.dismissDialog();
+                Toast.makeText(mSubActivity, "Lưu hình ảnh thành công", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onFailure(Call<users> call, Throwable t) {
+                loadingDialog.dismissDialog();
+                Toast.makeText(mSubActivity, "Đã xảy ra lỗi khi thực hiện", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     @Override
@@ -148,20 +212,21 @@ public class ProfileFragment extends Fragment {
         super.onActivityResult(requestCode, resultCode, data);
         switch(requestCode){
             case 0:
-                if(resultCode ==    mSubActivity.RESULT_OK){
+                if(resultCode == mSubActivity.RESULT_OK){
                     Bitmap bmp = (Bitmap) data.getExtras().get("data");
                     ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                    bmp.compress(Bitmap.CompressFormat.PNG, 100, stream);
+                    bmp.compress(Bitmap.CompressFormat.JPEG, 100, stream);
                     byte[] byteArray = stream.toByteArray();
                     Bitmap bitmap = BitmapFactory.decodeByteArray(byteArray, 0,
                             byteArray.length);
-                    Log.e("AAA", bitmap + "");
                     imageView_avatar_user.setImageBitmap(bitmap);
+                    mUri = getImageUri(view.getContext(), bmp);
                     break;
                 }
             case 1:
                 if(resultCode == mSubActivity.RESULT_OK){
                     Uri pickImage = data.getData();
+                    mUri = pickImage;
                     String paths = pickImage.getPath();
                     File imageFile = new File(paths);
                     Log.e("AAA", "" + imageFile);
@@ -169,6 +234,13 @@ public class ProfileFragment extends Fragment {
                     break;
                 }
         }
+    }
+
+    public Uri getImageUri(Context inContext, Bitmap inImage) {
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        inImage.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
+        String path = MediaStore.Images.Media.insertImage(inContext.getContentResolver(), inImage, String.valueOf(System.currentTimeMillis()), null);
+        return Uri.parse(path);
     }
 
     private void openRequest(){
@@ -244,6 +316,12 @@ public class ProfileFragment extends Fragment {
             public void onClick(View v) {
                 dialog.dismiss();
                 Intent takePhoto = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                /*File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
+                        Environment.DIRECTORY_PICTURES), "AvatarFolder");
+                mediaStorageDir.mkdirs();
+                mUri = Uri.fromFile(new File(mediaStorageDir.getPath() + File.separator +
+                        "avatar.jpg"));
+                takePhoto.putExtra(MediaStore.EXTRA_OUTPUT, mUri);*/
                 startActivityForResult(takePhoto, 0);
             }
         });
@@ -273,12 +351,14 @@ public class ProfileFragment extends Fragment {
         btn_profile_edit            = (Button)view.findViewById(R.id.btn_profile_edit);
         btn_profile_changePass      = (Button)view.findViewById(R.id.btn_profile_changePass);
         btn_add_avatar              = (Button)view.findViewById(R.id.btn_add_avatar);
+        btn_save_avatar             = (Button)view.findViewById(R.id.btn_save_avatar);
         toolbar                     = (Toolbar)mSubActivity.findViewById(R.id.toolbar);
         imageView_avatar_user       = (CircleImageView)view.findViewById(R.id.imageView_avatar_user);
         txv_profile_userName        = (TextView)view.findViewById(R.id.txv_profile_userName);
         txv_profile_email           = (TextView)view.findViewById(R.id.txv_profile_email);
         txv_profile_fullName        = (TextView)view.findViewById(R.id.txv_profile_fullName);
         txv_profile_title_fullName  = (TextView)view.findViewById(R.id.txv_profile_title_fullName);
+        loadingDialog = new LoadingDialog(mSubActivity);
     }
 
 

@@ -17,6 +17,7 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.eatcleanapp.API.APIService;
 import com.example.eatcleanapp.databinding.ActivityMainBinding;
 import com.example.eatcleanapp.model.users;
 import com.example.eatcleanapp.ui.home.HomeFragment;
@@ -39,6 +40,10 @@ import androidx.appcompat.app.AppCompatActivity;
 
 
 import org.jetbrains.annotations.NotNull;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
@@ -65,6 +70,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onCreate(savedInstanceState);
         user = DataLocalManager.getUser();
         if(user != null){
+            getUserByUsername(user.getUsername());
             if(user.getIDRole().equals("R001")){
                 Intent intent = new Intent(MainActivity.this, AdminActivity.class);
                 startActivity(intent);
@@ -136,6 +142,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private void Mapping(){
         edt_search_home = (EditText)findViewById(R.id.edt_search_recycler);
+    }
+
+    private void getUserByUsername(String Username){
+        APIService.apiService.getUserByUsername(Username).enqueue(new Callback<users>() {
+            @Override
+            public void onResponse(Call<users> call, Response<users> response) {
+                DataLocalManager.setUser(response.body());
+                user = DataLocalManager.getUser();
+            }
+
+            @Override
+            public void onFailure(Call<users> call, Throwable t) {
+                Toast.makeText(MainActivity.this , "Đã xảy ra lỗi", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     @Override

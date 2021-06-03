@@ -12,12 +12,10 @@ public class recipes implements Serializable {
     private String 	Steps;
     private String Time;
     private String Status;
-    private String Image;
+    private String ImageMain;
 
 
-    public recipes(String IDRecipes, String recipesTitle, String recipesAuthor,
-                   String recipesContent, String nutritionalIngredients, String ingredients,
-                   String steps, String time, String status, String image) {
+    public recipes(String IDRecipes, String recipesTitle, String recipesAuthor, String recipesContent, String nutritionalIngredients, String ingredients, String steps, String time, String status, String imageMain) {
         this.IDRecipes = IDRecipes;
         RecipesTitle = recipesTitle;
         RecipesAuthor = recipesAuthor;
@@ -27,7 +25,7 @@ public class recipes implements Serializable {
         Steps = steps;
         Time = time;
         Status = status;
-        Image = image;
+        ImageMain = imageMain;
     }
 
     public String getIDRecipes() {
@@ -101,11 +99,12 @@ public class recipes implements Serializable {
     public void setStatus(String status) {
         Status = status;
     }
-    public String getImage() {
-        return Image;
+
+    public String getImageMain() {
+        return ImageMain;
     }
 
-    public void setImage(String image) {
-        Image = image;
+    public void setImageMain(String imageMain) {
+        ImageMain = imageMain;
     }
 }

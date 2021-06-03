@@ -1,16 +1,9 @@
 package com.example.eatcleanapp.ui.home.tabHome;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-
-import androidx.appcompat.widget.Toolbar;
-import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.recyclerview.widget.StaggeredGridLayoutManager;
-
 import android.os.Handler;
+import android.os.StrictMode;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -19,16 +12,15 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.volley.Request;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.StaggeredGridLayoutManager;
+
 import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.eatcleanapp.IClickListener;
 import com.example.eatcleanapp.MainActivity;
@@ -43,8 +35,13 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 
 public class RecipesFragment extends Fragment implements IClickListener {
@@ -66,6 +63,8 @@ public class RecipesFragment extends Fragment implements IClickListener {
         view = inflater.inflate(R.layout.fragment_recipes, container, false);
         loadingDialog = new LoadingDialog(mMainActivity);
         Mapping();
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy((policy));
         mRecipesAdapter = new RecipesAdapter(getContext(), this, false);
         StaggeredGridLayoutManager gridLayoutManager = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);;
         rcvRecipes.setLayoutManager(gridLayoutManager);
@@ -136,50 +135,95 @@ public class RecipesFragment extends Fragment implements IClickListener {
 
 
     public void GetData (String url){
-        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
-            @Override
-            public void onResponse(JSONArray response) {
-                for (int i = 0; i < response.length(); i ++){
-                    try {
-                        JSONObject object = response.getJSONObject(i);
-                        int checkExist = 0;
-                        recipes recipe = new recipes(
-                                object.getString("IDRecipes"),
+//        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
+//            @Override
+//            public void onResponse(JSONArray response) {
+//                for (int i = 0; i < response.length(); i ++){
+//                    try {
+//                        JSONObject object = response.getJSONObject(i);
+//                        int checkExist = 0;
+//                        recipes recipe = new recipes(
+//                                object.getString("IDRecipes"),
+//                                object.getString("RecipesTitle"),
+//                                object.getString("RecipesAuthor"),
+//                                object.getString("RecipesContent"),
+//                                object.getString("NutritionalIngredients"),
+//                                object.getString("Ingredients"),
+//                                object.getString("Steps"),
+//                                object.getString("Time"),
+//                                object.getString("Status"),
+//                                object.getString("RecipesImages")
+//                        );
+//                        for (recipes recipetemp: listRecipes) {
+//                            if (recipetemp.getIDRecipes().equals(recipe.getIDRecipes())){
+//                                checkExist = 1;
+//                                break;
+//                            }
+//                        }
+//                        if (checkExist == 0){
+//                            listRecipes.add(recipe);
+//                            oldList.add(recipe);
+//                        }
+//                    } catch (JSONException e) {
+//                        e.printStackTrace();
+//                    }
+//                }
+//                mRecipesAdapter.setData(listRecipes);
+//                mRecipesAdapter.setOldData(oldList);
+//                loadingDialog.dismissDialog();
+//            }
+//        }, new Response.ErrorListener() {
+//            @Override
+//            public void onErrorResponse(VolleyError error) {
+//                Toast.makeText(view.getContext(), error.toString(), Toast.LENGTH_LONG).show();
+//            }
+//        });
+//        requestQueue.add(jsonArrayRequest);
+
+        OkHttpClient client = new OkHttpClient().newBuilder()
+                .build();
+        Request request = new Request.Builder()
+                .url("https://eat-clean-nhom04.herokuapp.com/me/show-recipe")
+                .method("GET", null)
+                .build();
+        try {
+            Response response = client.newCall(request).execute();
+            String jsonData = response.body().string();
+            JSONObject Jobject = new JSONObject(jsonData);
+            if (response.isSuccessful()){
+                //JSONObject data = Jobject.getJSONObject("data");
+                JSONArray myResponse = Jobject.getJSONArray("data");
+                for (int i = 0; i < myResponse.length();i ++){
+                    JSONObject object = myResponse.getJSONObject(i);
+                    recipes recipe = new recipes(
+                                "aaaaa",
                                 object.getString("RecipesTitle"),
                                 object.getString("RecipesAuthor"),
                                 object.getString("RecipesContent"),
                                 object.getString("NutritionalIngredients"),
                                 object.getString("Ingredients"),
                                 object.getString("Steps"),
-                                object.getString("Time"),
+                                object.getString("IDAuthor"),
                                 object.getString("Status"),
-                                object.getString("RecipesImages")
+                                object.getString("ImageMain")
                         );
-                        for (recipes recipetemp: listRecipes) {
-                            if (recipetemp.getIDRecipes().equals(recipe.getIDRecipes())){
-                                checkExist = 1;
-                                break;
-                            }
-                        }
-                        if (checkExist == 0){
-                            listRecipes.add(recipe);
-                            oldList.add(recipe);
-                        }
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
+                    listRecipes.add(recipe);
+                    oldList.add(recipe);
                 }
                 mRecipesAdapter.setData(listRecipes);
                 mRecipesAdapter.setOldData(oldList);
                 loadingDialog.dismissDialog();
             }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Toast.makeText(view.getContext(), error.toString(), Toast.LENGTH_LONG).show();
+            else {
+                JSONObject error = Jobject.getJSONObject("error");
+                Toast.makeText(view.getContext(),  error.toString() , Toast.LENGTH_LONG).show();
             }
-        });
-        requestQueue.add(jsonArrayRequest);
+
+        } catch (IOException | JSONException e) {
+            Toast.makeText(view.getContext(),   e.toString() , Toast.LENGTH_LONG).show();
+        }
+
+
     }
 
     @Override

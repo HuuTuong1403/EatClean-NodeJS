@@ -15,8 +15,10 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.example.eatcleanapp.MainActivity;
 import com.example.eatcleanapp.R;
 import com.example.eatcleanapp.model.users;
@@ -87,10 +89,12 @@ public class SettingHomeFragment extends Fragment {
         View headerView                 = navigationView.getHeaderView(0);
         TextView txv_fullName           = (TextView)headerView.findViewById(R.id.user_fullname_home);
         TextView txv_email              = (TextView)headerView.findViewById(R.id.user_email_home);
+        ImageView user_avatar_home      = (ImageView)headerView.findViewById(R.id.user_avatar_home);
         ImageButton img_search          = (ImageButton)mMainActivity.findViewById(R.id.searchBox);
         img_search.setVisibility(View.VISIBLE);
         txv_fullName.setText("Eat Clean Application");
         txv_email.setText("eatcleanCompany@gmail.com");
+        user_avatar_home.setImageResource(R.drawable.imageheader);
 
         menu.findItem(R.id.nav_signin).setVisible(true);
         ImageButton btnProfile = (ImageButton)mMainActivity.findViewById(R.id.btnProfile);
