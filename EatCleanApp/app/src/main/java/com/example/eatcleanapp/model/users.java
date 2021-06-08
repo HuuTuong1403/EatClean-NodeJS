@@ -4,7 +4,7 @@ package com.example.eatcleanapp.model;
 import java.io.Serializable;
 
 public class users implements Serializable {
-    private String IDUser;
+    private String _id;
     private String Username;
     private String Email;
     private String Password;
@@ -13,19 +13,12 @@ public class users implements Serializable {
     private String LoginFB;
     private String IDRole;
     private String Status;
-    private String Token;
+    private String token;
+    private String SoDienThoai;
 
-    public String getToken() {
-        return Token;
-    }
-
-    public void setToken(String token) {
-        Token = token;
-    }
-
-    public users(String IDUser, String username, String email, String password,
-                 String fullName, String image, String loginFB, String IDRole, String status, String token) {
-        this.IDUser = IDUser;
+    public users(String _id, String username, String email, String password, String fullName, String image, String loginFB,
+                 String IDRole, String status, String token, String soDienThoai) {
+        this._id = _id;
         Username = username;
         Email = email;
         Password = password;
@@ -34,15 +27,16 @@ public class users implements Serializable {
         LoginFB = loginFB;
         this.IDRole = IDRole;
         Status = status;
-        Token = token;
+        this.token = token;
+        SoDienThoai = soDienThoai;
     }
 
-    public String getIDUser() {
-        return IDUser;
+    public String get_id() {
+        return _id;
     }
 
-    public void setIDUser(String IDUser) {
-        this.IDUser = IDUser;
+    public void set_id(String _id) {
+        this._id = _id;
     }
 
     public String getUsername() {
@@ -107,5 +101,21 @@ public class users implements Serializable {
 
     public void setStatus(String status) {
         Status = status;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
+
+    public String getSoDienThoai() {
+        return SoDienThoai;
+    }
+
+    public void setSoDienThoai(String soDienThoai) {
+        SoDienThoai = soDienThoai;
     }
 }

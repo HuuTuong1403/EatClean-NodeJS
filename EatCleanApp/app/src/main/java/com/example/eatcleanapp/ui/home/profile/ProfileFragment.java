@@ -175,7 +175,7 @@ public class ProfileFragment extends Fragment {
                     public void run() {
                         if(mUri != null){
                             loadingDialog.startLoadingDialog();
-                            UploadAvatar(user.getIDUser());
+                            UploadAvatar(user.get_id());
                         }
                     }
                 },400);

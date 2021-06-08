@@ -28,12 +28,20 @@ import com.example.eatcleanapp.ui.home.tabHome.recipes.RecipesAdapter;
 import com.example.eatcleanapp.ui.nguoidung.data_local.DataLocalManager;
 import com.google.android.material.navigation.NavigationView;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+
 
 public class FavoritesFragment extends Fragment implements IClickListener {
 
@@ -46,7 +54,6 @@ public class FavoritesFragment extends Fragment implements IClickListener {
     private RecyclerView rcv_Favorites_Recipes;
     private RecipesAdapter mRecipesAdapter;
     private List<recipes> listFavoritesRecipes;
-    private String getRecipeLink;
     private LoadingDialog loadingDialog;
 
     @Override
@@ -95,20 +102,46 @@ public class FavoritesFragment extends Fragment implements IClickListener {
     }
 
     public void GetData (){
-        APIService.apiService.getFavorites_User(userIsLogin.getIDUser()).enqueue(new Callback<List<recipes>>() {
-            @Override
-            public void onResponse(Call<List<recipes>> call, Response<List<recipes>> response) {
-                listFavoritesRecipes = response.body();
-                Log.d("AAA", response.body().toString());
+      OkHttpClient client = new OkHttpClient().newBuilder()
+                .build();
+        Request request = new Request.Builder()
+                .url("https://eat-clean-nhom04.herokuapp.com/me/show-recipe-favorite")
+                .method("GET", null)
+                .addHeader("Authorization", "Bearer " + userIsLogin.getToken())
+                .build();
+        try {
+            Response response = client.newCall(request).execute();
+            String jsonData = response.body().string();
+            JSONObject Jobject = new JSONObject(jsonData);
+            if (response.isSuccessful()){
+                //JSONObject data = Jobject.getJSONObject("data");
+                JSONArray myResponse = Jobject.getJSONArray("data");
+                for (int i = 0; i < myResponse.length();i ++){
+                    JSONObject object = myResponse.getJSONObject(i);
+                    recipes recipe = new recipes(
+                            object.getString("_id"),
+                            object.getString("RecipesTitle"),
+                            object.getString("RecipesAuthor"),
+                            object.getString("RecipesContent"),
+                            object.getString("NutritionalIngredients"),
+                            object.getString("Ingredients"),
+                            object.getString("Steps"),
+                            object.getString("IDAuthor"),
+                            object.getString("Status"),
+                            object.getString("ImageMain")
+                    );
+                    listFavoritesRecipes.add(recipe);
+                }
                 mRecipesAdapter.setData(listFavoritesRecipes);
                 loadingDialog.dismissDialog();
             }
-
-            @Override
-            public void onFailure(Call<List<recipes>> call, Throwable t) {
-                Toast.makeText(mMainActivity, "Call Api Error", Toast.LENGTH_SHORT).show();
+            else {
+                JSONObject error = Jobject.getJSONObject("error");
+                Toast.makeText(view.getContext(),  error.toString() , Toast.LENGTH_LONG).show();
             }
-        });
+        } catch (IOException | JSONException e) {
+            Toast.makeText(view.getContext(),   e.toString() , Toast.LENGTH_LONG).show();
+        }
     }
 
     @Override

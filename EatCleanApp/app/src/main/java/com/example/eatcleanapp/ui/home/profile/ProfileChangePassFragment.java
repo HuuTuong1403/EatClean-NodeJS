@@ -66,7 +66,7 @@ public class ProfileChangePassFragment extends Fragment {
                                 }
                                 else{
                                     if(newPassAgain.equals(newPass)){
-                                        changePass(user.getIDUser(), newPass);
+                                        changePass(user.get_id(), newPass);
                                         profileChangePass_edt_oldPassword.setText("");
                                         profileChangePass_edt_newPassword.setText("");
                                         profileChangePass_edt_newPasswordAgain.setText("");

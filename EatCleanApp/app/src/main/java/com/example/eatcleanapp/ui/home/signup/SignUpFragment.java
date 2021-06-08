@@ -35,7 +35,7 @@ import okhttp3.Response;
 public class SignUpFragment extends Fragment {
 
     private View view;
-    private TextInputEditText edtUsername, edtEmail, edtPassword, edtPasswordAgain, edtFullName;
+    private TextInputEditText edtUsername, edtEmail, edtPassword, edtPasswordAgain, edtFullName, edtPhone;
     private Button btnRegister;;
     private ScrollView scrollView;
     private SubActivity mSubActivity;
@@ -82,6 +82,7 @@ public class SignUpFragment extends Fragment {
         edtPasswordAgain = (TextInputEditText) view.findViewById(R.id.signup_edtPasswordAgain);
         edtFullName = (TextInputEditText) view.findViewById(R.id.signup_edtFullname);
         btnRegister = (Button) view.findViewById(R.id.signup_btnRegister);
+        edtPhone = (TextInputEditText) view.findViewById(R.id.signup_edtSDT);
         scrollView = (ScrollView)view.findViewById(R.id.backgroundSignUp);
     }
     private void registerUser(){
@@ -95,6 +96,7 @@ public class SignUpFragment extends Fragment {
                     .addFormDataPart("Password",edtPassword.getText().toString().trim())
                     .addFormDataPart("FullName",edtFullName.getText().toString().trim())
                     .addFormDataPart("Username",edtUsername.getText().toString().trim())
+                    .addFormDataPart("SoDienThoai",edtPhone.getText().toString().trim())
                     .build();
             Request request = new Request.Builder()
                     .url("https://eat-clean-nhom04.herokuapp.com/user/register-user")

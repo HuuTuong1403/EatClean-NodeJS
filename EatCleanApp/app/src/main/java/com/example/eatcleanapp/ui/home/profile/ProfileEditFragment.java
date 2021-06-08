@@ -28,21 +28,31 @@ import com.example.eatcleanapp.model.users;
 import com.example.eatcleanapp.ui.nguoidung.data_local.DataLocalManager;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.gson.Gson;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 import retrofit2.http.POST;
 
 public class ProfileEditFragment extends Fragment {
 
     private View view;
     private SubActivity mSubActivity;
-    private TextInputLayout profileEdit_layout_email, profileEdit_layout_fullName;
-    private TextInputEditText profileEdit_edt_userName, profileEdit_edt_email, profileEdit_edt_fullName;
+    private TextInputLayout profileEdit_layout_email, profileEdit_layout_fullName, profileEdit_layout_sdt;
+    private TextInputEditText profileEdit_edt_userName, profileEdit_edt_email, profileEdit_edt_fullName, profileEdit_edt_sdt;
     private Button profileEdt_btn_saveChange, profileEdt_btn_cancelChange;
     private Toolbar toolbar;
     private users user;
@@ -61,7 +71,7 @@ public class ProfileEditFragment extends Fragment {
         //Set layout
         profileEdit_layout_email.setHint(user.getEmail());
         profileEdit_layout_fullName.setHint(user.getFullName());
-
+        profileEdit_layout_sdt.setHint(user.getSoDienThoai());
         //Animate and Delay
         Animation animButton = mSubActivity.getAnimButton(view);
         Handler handler = new Handler();
@@ -73,30 +83,17 @@ public class ProfileEditFragment extends Fragment {
                 handler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        getUsers();
-                        if(profileEdit_edt_email.getText().toString().isEmpty() || profileEdit_edt_fullName.getText().toString().isEmpty()){
+                        if(profileEdit_edt_email.getText().toString().isEmpty() ||
+                                profileEdit_edt_fullName.getText().toString().isEmpty() ||
+                        profileEdit_edt_sdt.getText().toString().isEmpty()){
                             Toast.makeText(mSubActivity, "Thông tin email hoặc họ tên không được trống", Toast.LENGTH_SHORT).show();
                             return;
                         }
                         else{
                             String Email = profileEdit_edt_email.getText().toString();
                             String FullName = profileEdit_edt_fullName.getText().toString();
-                            boolean checkEmail = false;
-                            for (users user: lstUsers) {
-                                if (Email.equals(user.getEmail())) {
-                                    checkEmail = true;
-                                }
-                            }
-                            if(!checkEmail){
-                                updateUser(user.getIDUser(), Email, FullName);
-                                profileEdit_edt_email.setText("");
-                                profileEdit_edt_fullName.setText("");
-                                profileEdit_layout_email.setHint(Email);
-                                profileEdit_layout_fullName.setHint(FullName);
-                            }
-                            else{
-                                Toast.makeText(mSubActivity, "Email đã tồn tại", Toast.LENGTH_SHORT).show();
-                            }
+                            String Phone = profileEdit_edt_sdt.getText().toString();
+                            updateUser(user.get_id(), Email, FullName, Phone);
                         }
                     }
                 }, 400);
@@ -135,55 +132,44 @@ public class ProfileEditFragment extends Fragment {
 
         profileEdit_layout_email    = (TextInputLayout)view.findViewById(R.id.profileEdit_layout_email);
         profileEdit_layout_fullName = (TextInputLayout)view.findViewById(R.id.profileEdit_layout_fullName);
+        profileEdit_layout_sdt = (TextInputLayout) view.findViewById(R.id.profileEdit_layout_sdt);
         profileEdit_edt_userName    = (TextInputEditText)view.findViewById(R.id.profileEdit_edt_userName);
         profileEdit_edt_email       = (TextInputEditText)view.findViewById(R.id.profileEdit_edt_email);
         profileEdit_edt_fullName    = (TextInputEditText)view.findViewById(R.id.profileEdit_edt_fullName);
         profileEdt_btn_saveChange   = (Button)view.findViewById(R.id.profileEdit_btn_saveChange);
         profileEdt_btn_cancelChange = (Button)view.findViewById(R.id.profileEdit_btn_cancelChange);
+        profileEdit_edt_sdt = (TextInputEditText) view.findViewById(R.id.profileEdit_edt_sdt);
         lstUsers                    = new ArrayList<>();
     }
 
-    private void getUsers(){
-        APIService.apiService.getUser().enqueue(new Callback<List<users>>() {
-            @Override
-            public void onResponse(Call<List<users>> call, Response<List<users>> response) {
-                lstUsers = response.body();
-            }
 
-            @Override
-            public void onFailure(Call<List<users>> call, Throwable t) {
-                Toast.makeText(mSubActivity, "Đã xảy ra lỗi", Toast.LENGTH_SHORT).show();
+    private void updateUser(String IDUser, String Email, String FullName, String Phone){
+        OkHttpClient client = new OkHttpClient().newBuilder()
+                .build();
+        MediaType mediaType = MediaType.parse("text/plain");
+        RequestBody body = new MultipartBody.Builder().setType(MultipartBody.FORM)
+                .addFormDataPart("FullName",profileEdit_edt_fullName.getText().toString().trim())
+                .addFormDataPart("Email",profileEdit_edt_email.getText().toString().trim())
+                .addFormDataPart("SoDienThoai",profileEdit_edt_sdt.getText().toString().trim())
+                .build();
+        Request request = new Request.Builder()
+                .url("https://eat-clean-nhom04.herokuapp.com/me/edit-information")
+                .method("PUT", body)
+                .addHeader("Authorization", "Bearer " + user.getToken())
+                .build();
+        try {
+            Response response = client.newCall(request).execute();
+            String jsonData = response.body().string();
+            JSONObject Jobject = new JSONObject(jsonData);
+            if (response.isSuccessful()){
+                Toast.makeText(view.getContext(),  "Đăng ký thành công", Toast.LENGTH_LONG).show();
+                JSONObject data = Jobject.getJSONObject("data");
+                Gson g = new Gson();
+                user = g.fromJson(String.valueOf(data), users.class);
+                 DataLocalManager.setUser(user);
             }
-        });
-    }
-
-    private void getUserByUsername(String Username){
-        APIService.apiService.getUserByUsername(Username).enqueue(new Callback<users>() {
-            @Override
-            public void onResponse(Call<users> call, Response<users> response) {
-                DataLocalManager.setUser(response.body());
-                user = DataLocalManager.getUser();
-            }
-
-            @Override
-            public void onFailure(Call<users> call, Throwable t) {
-                Toast.makeText(mSubActivity, "Đã xảy ra lỗi", Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-
-    private void updateUser(String IDUser, String Email, String FullName){
-        APIService.apiService.updateUser(IDUser, Email, FullName).enqueue(new Callback<users>() {
-            @Override
-            public void onResponse(Call<users> call, Response<users> response) {
-                getUserByUsername(user.getUsername());
-                Toast.makeText(mSubActivity, "Thay đổi thông tin thành công", Toast.LENGTH_SHORT).show();
-            }
-
-            @Override
-            public void onFailure(Call<users> call, Throwable t) {
-                Toast.makeText(mSubActivity, "Thay đổi thông tin thất bại", Toast.LENGTH_SHORT).show();
-            }
-        });
+        } catch (IOException | JSONException e) {
+            e.printStackTrace();
+        }
     }
 }

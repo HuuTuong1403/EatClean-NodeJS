@@ -3,37 +3,38 @@ package com.example.eatcleanapp.model;
 import java.io.Serializable;
 
 public class recipes implements Serializable {
-    private String IDRecipes;
+    private String _id;
     private String RecipesTitle;
     private String RecipesAuthor;
     private String RecipesContent;
     private String NutritionalIngredients;
     private String Ingredients;
     private String 	Steps;
-    private String Time;
+    private String IDAuthor;
     private String Status;
     private String ImageMain;
 
 
-    public recipes(String IDRecipes, String recipesTitle, String recipesAuthor, String recipesContent, String nutritionalIngredients, String ingredients, String steps, String time, String status, String imageMain) {
-        this.IDRecipes = IDRecipes;
+    public recipes(String _id, String recipesTitle, String recipesAuthor, String recipesContent, String nutritionalIngredients,
+                   String ingredients, String steps, String IDAuthor, String status, String imageMain) {
+        this._id = _id;
         RecipesTitle = recipesTitle;
         RecipesAuthor = recipesAuthor;
         RecipesContent = recipesContent;
         NutritionalIngredients = nutritionalIngredients;
         Ingredients = ingredients;
         Steps = steps;
-        Time = time;
+        this.IDAuthor = IDAuthor;
         Status = status;
         ImageMain = imageMain;
     }
 
-    public String getIDRecipes() {
-        return IDRecipes;
+    public String get_id() {
+        return _id;
     }
 
-    public void setIDRecipes(String IDRecipes) {
-        this.IDRecipes = IDRecipes;
+    public void set_id(String _id) {
+        this._id = _id;
     }
 
     public String getRecipesTitle() {
@@ -84,12 +85,12 @@ public class recipes implements Serializable {
         Steps = steps;
     }
 
-    public String getTime() {
-        return Time;
+    public String getIDAuthor() {
+        return IDAuthor;
     }
 
-    public void setTime(String time) {
-        Time = time;
+    public void setIDAuthor(String IDAuthor) {
+        this.IDAuthor = IDAuthor;
     }
 
     public String getStatus() {

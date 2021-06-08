@@ -243,7 +243,7 @@ public class SignInFragment extends Fragment {
             jsonSignIn.put("Username", edtEmail.getText().toString().trim());
             jsonSignIn.put("Password", edtPassword.getText().toString().trim());
         } catch (JSONException e) {
-            e.printStackTrace();
+            Toast.makeText(view.getContext(),  e.toString() , Toast.LENGTH_LONG).show();
         }
         RequestBody body = RequestBody.create(mediaType, jsonSignIn.toString());
         Request request = new Request.Builder()

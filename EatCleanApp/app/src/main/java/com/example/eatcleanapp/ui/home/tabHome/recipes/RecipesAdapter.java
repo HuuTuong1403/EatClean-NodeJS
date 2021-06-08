@@ -34,13 +34,20 @@ import com.example.eatcleanapp.model.favoriterecipes;
 import com.example.eatcleanapp.model.recipes;
 import com.example.eatcleanapp.model.users;
 import com.example.eatcleanapp.ui.nguoidung.data_local.DataLocalManager;
+import com.google.gson.Gson;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 public class RecipesAdapter extends RecyclerView.Adapter<RecipesAdapter.RecipesViewHolder> implements Filterable {
 
@@ -194,9 +201,11 @@ public class RecipesAdapter extends RecyclerView.Adapter<RecipesAdapter.RecipesV
                                                     public void run() {
                                                         recipes_favorite.setImageDrawable(v.getResources().getDrawable(R.drawable.favorite_red));
                                                         check = true;
-                                                        String IDRecipes = mListRecipes.get(position).getIDRecipes();
-                                                        String IDUser = user.getIDUser();
-                                                        addRecipes(IDUser, IDRecipes);
+                                                        String IDRecipes = mListRecipes.get(position).get_id();
+                                                        String userToken = user.getToken();
+                                                        if (!addRecipes(userToken, IDRecipes)){
+                                                            recipes_favorite.setImageDrawable(v.getResources().getDrawable(R.drawable.favorite_black));
+                                                        };
                                                         dialog.dismiss();
                                                     }
                                                 }, 400);
@@ -244,7 +253,9 @@ public class RecipesAdapter extends RecyclerView.Adapter<RecipesAdapter.RecipesV
                             @Override
                             public void run() {
                                 recipes_favorite.setImageDrawable(itemView.getResources().getDrawable(R.drawable.favorite_black));
-                                deleteFavoritesRecipes(user.getIDUser(), mListRecipes.get(position).getIDRecipes());
+                                if (!deleteFavoritesRecipes(user.getToken(), mListRecipes.get(position).get_id())){
+                                    recipes_favorite.setImageDrawable(itemView.getResources().getDrawable(R.drawable.favorite_red));
+                                };
                             }
                         }, 400);
                     }
@@ -262,31 +273,69 @@ public class RecipesAdapter extends RecyclerView.Adapter<RecipesAdapter.RecipesV
 
     }
 
-    private void deleteFavoritesRecipes(String IDUser, String IDRecipe){
-        APIService.apiService.deleteFavoriteRecipes(IDUser, IDRecipe).enqueue(new Callback<favoriterecipes>() {
-            @Override
-            public void onResponse(Call<favoriterecipes> call, retrofit2.Response<favoriterecipes> response) {
-                Toast.makeText(context, "Bạn đã hủy yêu thích món ăn thành công", Toast.LENGTH_SHORT).show();
+    private boolean deleteFavoritesRecipes(String userToken, String IDRecipe){
+        OkHttpClient client = new OkHttpClient().newBuilder()
+                .build();
+        MediaType mediaType = MediaType.parse("text/plain");
+        RequestBody body = RequestBody.create(mediaType, "");
+        Request request = new Request.Builder()
+                .url("https://eat-clean-nhom04.herokuapp.com/me/delete-favorite-recipe?IDRecipe=" + IDRecipe)
+                .method("DELETE", body)
+                .addHeader("Authorization", "Bearer " + userToken)
+                .build();
+        try {
+            Response response = client.newCall(request).execute();
+            String jsonData = response.body().string();
+            JSONObject Jobject = new JSONObject(jsonData);
+            if (response.isSuccessful()){
+                Toast.makeText(context,  "Xóa món ăn yêu thích thành công" , Toast.LENGTH_LONG).show();
+                return true;
             }
-
-            @Override
-            public void onFailure(Call<favoriterecipes> call, Throwable t) {
-                Toast.makeText(context, "Đã xảy ra lỗi trong quá trình hủy yêu thích", Toast.LENGTH_SHORT).show();
+            else {
+                JSONObject data = Jobject.getJSONObject("data");
+                JSONObject error = Jobject.getJSONObject("error");
+                Toast.makeText(context,  error.toString() , Toast.LENGTH_LONG).show();
+                return false;
             }
-        });
+        } catch (IOException | JSONException e) {
+            Toast.makeText(context,  e.toString() , Toast.LENGTH_LONG).show();
+        }
+        return false;
     }
 
-    private void addRecipes(String IDUser, String IDRecipes){
-        APIService.apiService.addFavoriteRecipes(IDUser, IDRecipes).enqueue(new Callback<favoriterecipes>() {
-            @Override
-            public void onResponse(Call<favoriterecipes> call, Response<favoriterecipes> response) {
-                Toast.makeText(context, "Bạn thêm món ăn vào mục yêu thích thành công", Toast.LENGTH_SHORT).show();
+    private boolean addRecipes(String userToken, String IDRecipes){
+        OkHttpClient client = new OkHttpClient().newBuilder()
+                .build();
+        MediaType mediaType = MediaType.parse("application/json");
+        JSONObject jsonIDRecipe = new JSONObject();
+        try {
+            jsonIDRecipe.put("IDRecipe", IDRecipes);
+        } catch (JSONException e) {
+            Toast.makeText(context,  e.toString() , Toast.LENGTH_LONG).show();
+        }
+        RequestBody body = RequestBody.create(mediaType, jsonIDRecipe.toString());
+        Request request = new Request.Builder()
+                .url("https://eat-clean-nhom04.herokuapp.com/me/favorite-recipe")
+                .method("POST", body)
+                .addHeader("Authorization", "Bearer " + userToken)
+                .build();
+        try {
+            Response response = client.newCall(request).execute();
+            String jsonData = response.body().string();
+            JSONObject Jobject = new JSONObject(jsonData);
+            if (response.isSuccessful()){
+                Toast.makeText(context,  "Thêm món ăn yêu thích thành công" , Toast.LENGTH_LONG).show();
+                return true;
             }
-
-            @Override
-            public void onFailure(Call<favoriterecipes> call, Throwable t) {
-                Toast.makeText(context, "Bạn thêm món ăn vào mục yêu thích không thành công", Toast.LENGTH_SHORT).show();
+            else {
+                JSONObject data = Jobject.getJSONObject("data");
+                JSONObject error = Jobject.getJSONObject("error");
+                Toast.makeText(context,  error.toString() , Toast.LENGTH_LONG).show();
+                return false;
             }
-        });
+        } catch (IOException | JSONException e) {
+            Toast.makeText(context,  e.toString() , Toast.LENGTH_LONG).show();
+        }
+        return false;
     }
 }
