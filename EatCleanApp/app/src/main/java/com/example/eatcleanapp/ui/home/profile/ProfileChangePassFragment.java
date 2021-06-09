@@ -21,10 +21,20 @@ import com.example.eatcleanapp.R;
 import com.example.eatcleanapp.SubActivity;
 import com.example.eatcleanapp.model.users;
 import com.example.eatcleanapp.ui.nguoidung.data_local.DataLocalManager;
+import com.google.gson.Gson;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
+
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+
 
 public class ProfileChangePassFragment extends Fragment {
 
@@ -60,24 +70,19 @@ public class ProfileChangePassFragment extends Fragment {
                             String oldPass = profileChangePass_edt_oldPassword.getText().toString();
                             String newPass = profileChangePass_edt_newPassword.getText().toString();
                             String newPassAgain = profileChangePass_edt_newPasswordAgain.getText().toString();
-                            if(oldPass.equals(user.getPassword())){
-                                if(newPass.equals(oldPass)){
-                                    Toast.makeText(mSubActivity, "Mật khẩu mới phải khác mật khẩu cũ", Toast.LENGTH_SHORT).show();
-                                }
-                                else{
-                                    if(newPassAgain.equals(newPass)){
-                                        changePass(user.get_id(), newPass);
-                                        profileChangePass_edt_oldPassword.setText("");
-                                        profileChangePass_edt_newPassword.setText("");
-                                        profileChangePass_edt_newPasswordAgain.setText("");
-                                    }
-                                    else{
-                                        Toast.makeText(mSubActivity, "Mật khẩu nhập lại không giống", Toast.LENGTH_SHORT).show();
-                                    }
-                                }
+                            if(newPass.equals(oldPass)){
+                                Toast.makeText(mSubActivity, "Mật khẩu mới phải khác mật khẩu cũ", Toast.LENGTH_SHORT).show();
                             }
                             else{
-                                Toast.makeText(mSubActivity, "Mật khẩu cũ không chính xác", Toast.LENGTH_SHORT).show();
+                                if(newPassAgain.equals(newPass)){
+                                    changePass(user.getToken(), newPass, newPassAgain,oldPass);
+                                    profileChangePass_edt_oldPassword.setText("");
+                                    profileChangePass_edt_newPassword.setText("");
+                                    profileChangePass_edt_newPasswordAgain.setText("");
+                                }
+                                else{
+                                    Toast.makeText(mSubActivity, "Mật khẩu nhập lại không giống", Toast.LENGTH_SHORT).show();
+                                }
                             }
                         }
                     }
@@ -111,34 +116,42 @@ public class ProfileChangePassFragment extends Fragment {
         return view;
     }
 
-    private void getUserByUsername(String Username){
-        APIService.apiService.getUserByUsername(Username).enqueue(new Callback<users>() {
-            @Override
-            public void onResponse(Call<users> call, Response<users> response) {
-                DataLocalManager.setUser(response.body());
-                user = DataLocalManager.getUser();
-            }
 
-            @Override
-            public void onFailure(Call<users> call, Throwable t) {
-                Toast.makeText(mSubActivity, "Đã xảy ra lỗi", Toast.LENGTH_SHORT).show();
+    private void changePass(String userToken, String Password, String confirmPassword ,String OldPassword ){
+        OkHttpClient client = new OkHttpClient().newBuilder()
+                .build();
+        MediaType mediaType = MediaType.parse("application/json");
+        JSONObject jsonSignIn = new JSONObject();
+        try {
+            jsonSignIn.put("PasswordOld", OldPassword);
+            jsonSignIn.put("PasswordNew", Password);
+            jsonSignIn.put("ConfirmPassword", confirmPassword);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        RequestBody body = RequestBody.create(mediaType, jsonSignIn.toString());
+        Request request = new Request.Builder()
+                .url("https://eat-clean-nhom04.herokuapp.com/me/change-password")
+                .method("PUT", body)
+                .addHeader("Authorization", "Bearer " + userToken)
+                .build();
+        try {
+            Response response = client.newCall(request).execute();
+            String jsonData = response.body().string();
+            JSONObject Jobject = new JSONObject(jsonData);
+            if (response.isSuccessful()){
+                JSONObject data = Jobject.getJSONObject("data");
+                Gson g = new Gson();
+                user = g.fromJson(String.valueOf(data), users.class);
+                DataLocalManager.setUser(user);
             }
-        });
-    }
-
-    private void changePass(String IDUser, String Password){
-        APIService.apiService.changePass(IDUser, Password).enqueue(new Callback<users>() {
-            @Override
-            public void onResponse(Call<users> call, Response<users> response) {
-                getUserByUsername(user.getUsername());
-                Toast.makeText(mSubActivity, "Đổi mật khẩu thành công", Toast.LENGTH_SHORT).show();
+            else {
+                JSONObject error = Jobject.getJSONObject("error");
+                Toast.makeText(view.getContext(),  error.toString() , Toast.LENGTH_LONG).show();
             }
-
-            @Override
-            public void onFailure(Call<users> call, Throwable t) {
-                Toast.makeText(mSubActivity, "Đổi mật khẩu thất bại", Toast.LENGTH_SHORT).show();
-            }
-        });
+        } catch (IOException | JSONException e) {
+            e.printStackTrace();
+        }
     }
 
     private void Mapping() {

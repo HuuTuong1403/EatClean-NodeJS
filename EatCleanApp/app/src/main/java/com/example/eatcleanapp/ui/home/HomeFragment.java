@@ -1,5 +1,6 @@
 package com.example.eatcleanapp.ui.home;
 
+import android.media.Image;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -29,9 +30,7 @@ import org.jetbrains.annotations.NotNull;
 public class HomeFragment extends Fragment {
     private ViewPager viewPager;
     private BottomNavigationView bottomNavigationView;
-    private TextView txv_user_fullName_home, txv_user_email_home;
     private View view;
-    private ImageButton searchBox;
     private MainActivity mMainActivity;
 
     public View onCreateView(@NotNull LayoutInflater inflater,
@@ -55,17 +54,23 @@ public class HomeFragment extends Fragment {
         return view;
     }
 
-    private void settingHasUser(users mUser) {
+    private void settingHasUser(users users) {
         NavigationView navigationView = (NavigationView)mMainActivity.findViewById(R.id.nav_view);
         View headerView                 = navigationView.getHeaderView(0);
         TextView txv_fullName           = (TextView)headerView.findViewById(R.id.user_fullname_home);
         TextView txv_email              = (TextView)headerView.findViewById(R.id.user_email_home);
         ImageView user_avatar_home      = (ImageView)headerView.findViewById(R.id.user_avatar_home);
-        txv_fullName.setText(mUser.getFullName());
-        txv_email.setText(mUser.getEmail());
-        Glide.with(view).load(mUser.getImage()).placeholder(R.drawable.gray).into(user_avatar_home);
+        txv_fullName.setText(users.getFullName());
+        txv_email.setText(users.getEmail());
+        Glide.with(view).load(users.getImage()).placeholder(R.drawable.gray).into(user_avatar_home);
         Menu menu = navigationView.getMenu();
         menu.findItem(R.id.nav_signin).setVisible(false);
+        if(users.getIDRole().equals("609d2d03fee09d75f011158c")){
+            menu.findItem(R.id.nav_ctv).setVisible(true);
+        }
+        else{
+            menu.findItem(R.id.nav_ctv).setVisible(false);
+        }
         ImageButton btnProfile = (ImageButton)mMainActivity.findViewById(R.id.btnProfile);
         btnProfile.setVisibility(View.VISIBLE);
     }
@@ -91,6 +96,12 @@ public class HomeFragment extends Fragment {
                     case R.id.menu_blog_home:
                         viewPager.setCurrentItem(1);
                         break;
+                    case R.id.menu_listAdd_recipe:
+                        viewPager.setCurrentItem(2);
+                        break;
+                    case R.id.menu_listAdd_blog:
+                        viewPager.setCurrentItem(3);
+                        break;
                 }
                 return true;
             }
@@ -110,6 +121,12 @@ public class HomeFragment extends Fragment {
                         break;
                     case 1:
                         bottomNavigationView.getMenu().findItem(R.id.menu_blog_home).setChecked(true);
+                        break;
+                    case 2:
+                        bottomNavigationView.getMenu().findItem(R.id.menu_listAdd_recipe).setChecked(true);
+                        break;
+                    case 3:
+                        bottomNavigationView.getMenu().findItem(R.id.menu_listAdd_blog).setChecked(true);
                         break;
                 }
             }

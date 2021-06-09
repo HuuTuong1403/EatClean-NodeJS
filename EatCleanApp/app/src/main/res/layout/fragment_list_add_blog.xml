@@ -3,10 +3,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.home.tabHome.BlogFragment">
+    tools:context=".ui.congtacvien.tabCTV.ListAddBlogFragment">
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/list_blogs"
+        android:id="@+id/list_updateBlog"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 </FrameLayout>

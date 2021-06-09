@@ -3,14 +3,42 @@ package com.example.eatcleanapp.model;
 public class comments {
     private String IDUser;
     private String IDRecipes;
-    private int Starts;
-    private String 	Comment;
+    private String Comment;
+    private String Username;
+    private String Image;
+    private String IDComment;
 
-    public comments(String IDUser, String IDRecipes, int starts, String comment) {
+    public comments(String IDUser, String IDRecipes, String comment, String username, String image, String IDComment) {
         this.IDUser = IDUser;
         this.IDRecipes = IDRecipes;
-        Starts = starts;
         Comment = comment;
+        Username = username;
+        Image = image;
+        this.IDComment = IDComment;
+    }
+
+    public String getImage() {
+        return Image;
+    }
+
+    public void setImage(String image) {
+        Image = image;
+    }
+
+    public String getIDComment() {
+        return IDComment;
+    }
+
+    public void setIDComment(String IDComment) {
+        this.IDComment = IDComment;
+    }
+
+    public String getUsername() {
+        return Username;
+    }
+
+    public void setUsername(String username) {
+        Username = username;
     }
 
     public String getIDUser() {
@@ -27,14 +55,6 @@ public class comments {
 
     public void setIDRecipes(String IDRecipes) {
         this.IDRecipes = IDRecipes;
-    }
-
-    public int getStarts() {
-        return Starts;
-    }
-
-    public void setStarts(int starts) {
-        Starts = starts;
     }
 
     public String getComment() {

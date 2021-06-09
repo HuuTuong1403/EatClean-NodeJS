@@ -13,6 +13,10 @@
             android:icon="@drawable/ic_outline_person"
             android:title="Đăng nhập" />
         <item
+            android:id="@+id/nav_ctv"
+            android:icon="@drawable/ctv_24"
+            android:title="Cộng tác viên" />
+        <item
             android:id="@+id/nav_favorites"
             android:icon="@drawable/ic_favorites"
             android:title="Yêu thích" />

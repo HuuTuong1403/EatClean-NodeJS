@@ -104,6 +104,7 @@ public class SettingHomeFragment extends Fragment {
         mMainActivity.replaceFragment(new HomeFragment(), "Trang chủ");
         mMainActivity.setCurrentFragment(1);
         menu.findItem(R.id.nav_home).setChecked(true);
+        menu.findItem(R.id.nav_ctv).setVisible(false);
     }
 
     private void Mapping() {

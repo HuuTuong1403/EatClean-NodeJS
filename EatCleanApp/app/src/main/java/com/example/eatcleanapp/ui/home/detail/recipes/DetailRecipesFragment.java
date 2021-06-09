@@ -2,17 +2,21 @@ package com.example.eatcleanapp.ui.home.detail.recipes;
 
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
+import android.icu.text.TimeZoneFormat;
 import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentStatePagerAdapter;
 import androidx.viewpager.widget.ViewPager;
+
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.example.eatcleanapp.R;
@@ -20,9 +24,11 @@ import com.example.eatcleanapp.model.recipes;
 import com.example.eatcleanapp.ui.home.detail.DetailActivity;
 import com.example.eatcleanapp.ui.home.detail.recipes.tabdetail.DetailViewPagerAdapter;
 import com.example.eatcleanapp.ui.home.detail.recipes.tabdetail.TabLayoutCustom;
+import com.google.android.material.tabs.TabLayout;
 import com.makeramen.roundedimageview.RoundedImageView;
 
 import org.jetbrains.annotations.NotNull;
+import org.w3c.dom.Text;
 
 public class DetailRecipesFragment extends Fragment{
 
@@ -55,9 +61,14 @@ public class DetailRecipesFragment extends Fragment{
 
         //Get data
         recipes_detail = mDetailActivity.getRecipes();
-        Glide.with(view).load(recipes_detail.getImageMain()).into(image_detail_recipes);
-        txv_show_title_recipes.setText(recipes_detail.getRecipesTitle());
-        txv_show_content_recipes.setText(recipes_detail.getRecipesContent());
+        if(recipes_detail != null){
+            Glide.with(view).load(recipes_detail.getImageMain()).into(image_detail_recipes);
+            txv_show_title_recipes.setText(recipes_detail.getRecipesTitle());
+            txv_show_content_recipes.setText(recipes_detail.getRecipesContent());
+        }
+        else{
+            return;
+        }
 
         //ViewPager
         detailViewPagerAdapter = new DetailViewPagerAdapter(getActivity().getSupportFragmentManager(), FragmentStatePagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);

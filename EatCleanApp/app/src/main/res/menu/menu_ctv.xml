@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/menu_add_recipe"
+        android:title="Thêm công thức món ăn"
+        android:icon="@drawable/baseline_add_to_photos_24"/>
+    <item android:id="@+id/menu_add_blog"
+        android:title="Thêm blog"
+        android:icon="@drawable/baseline_playlist_add_24"/>
+    <item android:id="@+id/menu_listAdd_recipe"
+        android:title="Danh sách bài viết món ăn"
+        android:icon="@drawable/baseline_receipt_long_24"/>
+    <item android:id="@+id/menu_listAdd_blog"
+        android:title="Danh sách bài viết blog"
+        android:icon="@drawable/baseline_format_list_numbered_24"/>
+</menu>

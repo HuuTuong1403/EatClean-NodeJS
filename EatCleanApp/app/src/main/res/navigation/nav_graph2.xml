@@ -17,4 +17,16 @@
         tools:layout="@layout/fragment_detail_blog">
     </fragment>
 
+    <fragment
+        android:id="@+id/update_recipes_fragment"
+        android:name="com.example.eatcleanapp.ui.congtacvien.tabCTV.update.UpdateRecipeFragment"
+        tools:layout="@layout/fragment_update_recipe">
+    </fragment>
+
+    <fragment
+        android:id="@+id/update_blogs_fragment"
+        android:name="com.example.eatcleanapp.ui.congtacvien.tabCTV.update.UpdateBlogFragment"
+        tools:layout="@layout/fragment_update_blog">
+    </fragment>
+
 </navigation>

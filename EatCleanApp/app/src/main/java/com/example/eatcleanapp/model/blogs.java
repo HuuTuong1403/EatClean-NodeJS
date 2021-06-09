@@ -1,29 +1,35 @@
 package com.example.eatcleanapp.model;
 
-public class blogs {
-    private String IDBlog;
+import java.io.Serializable;
+
+public class blogs implements Serializable {
+    private String _id;
     private String BlogTitle;
     private String 	BlogAuthor;
     private String 	BlogContent;
-    private String Time;
+    private String IDAuthor;
+    private String ImageMain;
     private String Status;
+    private String createdAt;
 
-    public blogs(String IDBlog, String blogTitle, String blogAuthor,
-                 String blogContent, String time, String status) {
-        this.IDBlog = IDBlog;
+    public blogs(String _id, String blogTitle, String blogAuthor, String blogContent,
+                 String IDAuthor, String imageMain, String status, String createdAt) {
+        this._id = _id;
         BlogTitle = blogTitle;
         BlogAuthor = blogAuthor;
         BlogContent = blogContent;
-        Time = time;
+        this.IDAuthor = IDAuthor;
+        ImageMain = imageMain;
         Status = status;
+        this.createdAt = createdAt;
     }
 
-    public String getIDBlog() {
-        return IDBlog;
+    public String get_id() {
+        return _id;
     }
 
-    public void setIDBlog(String IDBlog) {
-        this.IDBlog = IDBlog;
+    public void set_id(String _id) {
+        this._id = _id;
     }
 
     public String getBlogTitle() {
@@ -50,12 +56,20 @@ public class blogs {
         BlogContent = blogContent;
     }
 
-    public String getTime() {
-        return Time;
+    public String getIDAuthor() {
+        return IDAuthor;
     }
 
-    public void setTime(String time) {
-        Time = time;
+    public void setIDAuthor(String IDAuthor) {
+        this.IDAuthor = IDAuthor;
+    }
+
+    public String getImageMain() {
+        return ImageMain;
+    }
+
+    public void setImageMain(String imageMain) {
+        ImageMain = imageMain;
     }
 
     public String getStatus() {
@@ -64,5 +78,13 @@ public class blogs {
 
     public void setStatus(String status) {
         Status = status;
+    }
+
+    public String getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(String createdAt) {
+        this.createdAt = createdAt;
     }
 }

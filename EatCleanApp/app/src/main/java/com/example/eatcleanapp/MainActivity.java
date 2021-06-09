@@ -20,6 +20,7 @@ import android.widget.Toast;
 import com.example.eatcleanapp.API.APIService;
 import com.example.eatcleanapp.databinding.ActivityMainBinding;
 import com.example.eatcleanapp.model.users;
+import com.example.eatcleanapp.ui.congtacvien.CtvFragment;
 import com.example.eatcleanapp.ui.home.HomeFragment;
 import com.example.eatcleanapp.ui.home.favorites.FavoritesFragment;
 import com.example.eatcleanapp.ui.home.setting.SettingHomeFragment;
@@ -30,6 +31,7 @@ import com.example.eatcleanapp.ui.quantrivien.AdminActivity;
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.navigation.NavigationView;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
@@ -62,6 +64,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private static final int FRAGMENT_SIGNIN = 2;
     private static final int FRAGMENT_FAVORITES = 3;
     private static final int FRAGMENT_SETTING = 4;
+    private static final int FRAGMENT_CTV = 5;
 
     private int currentFragment = FRAGMENT_HOME;
 
@@ -70,18 +73,32 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onCreate(savedInstanceState);
         user = DataLocalManager.getUser();
         if(user != null){
-            getUserByUsername(user.getUsername());
-            if(user.getIDRole().equals("R001")){
+            if(user.getIDRole().equals("609d2d54fee09d75f011158d")){
                 Intent intent = new Intent(MainActivity.this, AdminActivity.class);
                 startActivity(intent);
                 finish();
             }
-            else {
+            else{
                 onInit();
+                if(user.getIDRole().equals("609d2d03fee09d75f011158c")){
+                    navigationView.getMenu().findItem(R.id.nav_ctv).setVisible(true);
+                }
+                else{
+                    navigationView.getMenu().findItem(R.id.nav_ctv).setVisible(false);
+                }
             }
         }
         else{
             onInit();
+            Intent intent = getIntent();
+            int id = intent.getIntExtra("call-back", 0);
+            if(id == 1){
+                replaceFragment(new SignInFragment(), "Đăng nhập");
+                currentFragment = FRAGMENT_SIGNIN;
+                searchBox.setVisibility(View.INVISIBLE);
+                navigationView.getMenu().findItem(R.id.nav_signin).setChecked(true);
+
+            }
         }
     }
     private void onInit(){
@@ -138,26 +155,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         replaceFragment(new HomeFragment(), "Trang chủ");
         currentFragment = FRAGMENT_HOME;
         navigationView.getMenu().findItem(R.id.nav_home).setChecked(true);
+        navigationView.getMenu().findItem(R.id.nav_ctv).setVisible(false);
     }
 
     private void Mapping(){
         edt_search_home = (EditText)findViewById(R.id.edt_search_recycler);
     }
 
-    private void getUserByUsername(String Username){
-        APIService.apiService.getUserByUsername(Username).enqueue(new Callback<users>() {
-            @Override
-            public void onResponse(Call<users> call, Response<users> response) {
-                DataLocalManager.setUser(response.body());
-                user = DataLocalManager.getUser();
-            }
-
-            @Override
-            public void onFailure(Call<users> call, Throwable t) {
-                Toast.makeText(MainActivity.this , "Đã xảy ra lỗi", Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
 
     @Override
     public void onBackPressed() {
@@ -224,6 +228,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }
                 break;
             }
+            case R.id.nav_ctv: {
+                if(FRAGMENT_CTV != currentFragment){
+                    searchBox.setVisibility(View.INVISIBLE);
+                    replaceFragment(new CtvFragment(), "Cộng tác viên");
+                    currentFragment = FRAGMENT_CTV;
+                }
+            }
             default:
                 break;
         }
@@ -271,4 +282,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         navigationView.getMenu().findItem(R.id.nav_signin).setChecked(true);
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == this.RESULT_OK){
+            setResult(RESULT_OK, data);
+        }
+    }
 }

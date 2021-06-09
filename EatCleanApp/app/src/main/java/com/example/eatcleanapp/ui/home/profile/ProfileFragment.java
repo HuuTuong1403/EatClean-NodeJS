@@ -82,7 +82,7 @@ public class ProfileFragment extends Fragment {
     private Toolbar toolbar;
     private CircleImageView imageView_avatar_user;
     private users user;
-    private TextView txv_profile_userName, txv_profile_email, txv_profile_fullName, txv_profile_title_fullName;
+    private TextView txv_profile_userName, txv_profile_email, txv_profile_fullName, txv_profile_title_fullName, txv_profile_soDienThoai;
     private Uri mUri;
     private LoadingDialog loadingDialog;
 
@@ -105,6 +105,7 @@ public class ProfileFragment extends Fragment {
         txv_profile_userName.setText("Tên đăng nhập: " + user.getUsername());
         txv_profile_email.setText("Email: " + user.getEmail());
         txv_profile_fullName.setText("Họ và tên: " + user.getFullName());
+        txv_profile_soDienThoai.setText("Số điện thoại: " + user.getSoDienThoai());
         txv_profile_title_fullName.setText(user.getFullName());
         Glide.with(view).load(user.getImage()).placeholder(R.drawable.gray).into(imageView_avatar_user);
 
@@ -141,6 +142,7 @@ public class ProfileFragment extends Fragment {
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                users test = user;
                 Intent intent = new Intent(mSubActivity, MainActivity.class);
                 startActivity(intent);
                 mSubActivity.finish();
@@ -358,6 +360,7 @@ public class ProfileFragment extends Fragment {
         txv_profile_email           = (TextView)view.findViewById(R.id.txv_profile_email);
         txv_profile_fullName        = (TextView)view.findViewById(R.id.txv_profile_fullName);
         txv_profile_title_fullName  = (TextView)view.findViewById(R.id.txv_profile_title_fullName);
+        txv_profile_soDienThoai = (TextView) view.findViewById(R.id.txv_profile_SDT);
         loadingDialog = new LoadingDialog(mSubActivity);
     }
 

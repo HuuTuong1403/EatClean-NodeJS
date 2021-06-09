@@ -12,6 +12,7 @@ public class recipes implements Serializable {
     private String 	Steps;
     private String IDAuthor;
     private String Status;
+    private String Time;
     private String ImageMain;
 
 
