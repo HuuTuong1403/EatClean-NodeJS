@@ -16,6 +16,7 @@ import android.os.Bundle;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import android.os.StrictMode;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.util.Log;
@@ -34,8 +35,11 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.example.eatcleanapp.API.APIService;
 import com.example.eatcleanapp.R;
+import com.example.eatcleanapp.RealPathUtil;
 import com.example.eatcleanapp.model.recipes;
+import com.example.eatcleanapp.model.users;
 import com.example.eatcleanapp.ui.home.detail.DetailActivity;
+import com.example.eatcleanapp.ui.nguoidung.data_local.DataLocalManager;
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.MultiplePermissionsReport;
 import com.karumi.dexter.PermissionToken;
@@ -44,13 +48,20 @@ import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.PermissionRequestErrorListener;
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 public class UpdateRecipeFragment extends Fragment {
 
@@ -61,6 +72,7 @@ public class UpdateRecipeFragment extends Fragment {
     private EditText edt_updateRecipe_recipeTitle, edt_updateRecipe_recipeContent, edt_updateRecipe_recipeNutritional, edt_updateRecipe_recipeIngredients, edt_updateRecipe_recipeSteps, edt_updateRecipe_recipeTime;
     private Button btn_updateRecipe_sendApproval;
     private Uri mUri;
+    private static final MediaType MEDIA_TYPE_PNG = MediaType.parse("image/*");
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -68,6 +80,8 @@ public class UpdateRecipeFragment extends Fragment {
                              Bundle savedInstanceState) {
         detailActivity = (DetailActivity) getActivity();
         view = inflater.inflate(R.layout.fragment_update_recipe, container, false);
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy((policy));
         Mapping();
         setData();
         imgV_updateRecipe_uploadImage.setOnClickListener(new View.OnClickListener() {
@@ -143,17 +157,62 @@ public class UpdateRecipeFragment extends Fragment {
     }
 
     private void updateRecipeCtv(String id, String title, String author, String content, String nuTri, String ingredient, String step, String time, String status) {
-        APIService.apiService.updateRecipeCtv(id, title, author, content, nuTri, ingredient, step, time, status).enqueue(new Callback<recipes>() {
-            @Override
-            public void onResponse(Call<recipes> call, Response<recipes> response) {
-                Toast.makeText(detailActivity, "Chỉnh sửa món ăn thành công! Vui lòng chờ quản trị phê duyệt", Toast.LENGTH_SHORT).show();
-            }
+        File file;
+        String FileName = "";
+        RequestBody body;
+        if (mUri != null){
+            String pathImage = RealPathUtil.getRealPath(view.getContext(), mUri);
+            file = new File(pathImage);
 
-            @Override
-            public void onFailure(Call<recipes> call, Throwable t) {
-                Toast.makeText(detailActivity, "Chỉnh sửa món ăn thất bại", Toast.LENGTH_SHORT).show();
+            FileName = file.getName();
+            MediaType mediaType = MediaType.parse("text/plain");
+            body = new MultipartBody.Builder().setType(MultipartBody.FORM)
+                    .addFormDataPart("RecipesTitle",title)
+                    .addFormDataPart("RecipesContent",content)
+                    .addFormDataPart("NutritionalIngredients",nuTri)
+                    .addFormDataPart("Ingredients",ingredient)
+                    .addFormDataPart("Steps",step)
+                    .addFormDataPart("IDRecipe",id)
+                    .addFormDataPart("Time",time)
+                    .addFormDataPart("Image",FileName ,
+                            RequestBody.create(MEDIA_TYPE_PNG, file))
+                    .build();
+        }
+        else{
+            MediaType mediaType = MediaType.parse("text/plain");
+             body = new MultipartBody.Builder().setType(MultipartBody.FORM)
+                    .addFormDataPart("RecipesTitle",title)
+                    .addFormDataPart("RecipesContent",content)
+                    .addFormDataPart("NutritionalIngredients",nuTri)
+                    .addFormDataPart("Ingredients",ingredient)
+                    .addFormDataPart("Steps",step)
+                    .addFormDataPart("IDRecipe",id)
+                     .addFormDataPart("Time",time)
+                    .build();
+        }
+        users user = DataLocalManager.getUser();
+        OkHttpClient client = new OkHttpClient().newBuilder()
+                .build();
+
+        Request request = new Request.Builder()
+                .url("https://eat-clean-nhom04.herokuapp.com/collaborator/update-recipe")
+                .method("PUT", body)
+                .addHeader("Authorization", "Bearer " + user.getToken())
+                .build();
+        try {
+            Response response = client.newCall(request).execute();
+            if (response.isSuccessful()){
+                Toast.makeText(view.getContext(),  "Chỉnh sửa thành công", Toast.LENGTH_LONG).show();
             }
-        });
+            else {
+                String jsonData = response.body().string();
+                JSONObject jsonObject = new JSONObject(jsonData);
+                JSONObject error = jsonObject.getJSONObject("error");
+                Toast.makeText(view.getContext(),  error.toString() , Toast.LENGTH_LONG).show();
+            }
+        } catch (IOException | JSONException e) {
+            e.printStackTrace();
+        }
     }
 
     private void Mapping() {

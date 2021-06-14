@@ -32,6 +32,7 @@ import android.widget.Toast;
 import com.example.eatcleanapp.API.APIService;
 import com.example.eatcleanapp.MainActivity;
 import com.example.eatcleanapp.R;
+import com.example.eatcleanapp.RealPathUtil;
 import com.example.eatcleanapp.model.blogs;
 import com.example.eatcleanapp.model.recipes;
 import com.example.eatcleanapp.model.users;
@@ -44,17 +45,26 @@ import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.PermissionRequestErrorListener;
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+
+
 
 public class AddBlogFragment extends Fragment {
 
@@ -64,9 +74,8 @@ public class AddBlogFragment extends Fragment {
     private Button btn_addBlog_sendApproval;
     private MainActivity mMainActivity;
     private users user;
-    private List<blogs> listBlogs;
     private Uri mUri;
-    private String IDBlog;
+    private static final MediaType MEDIA_TYPE_PNG = MediaType.parse("image/*");
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -91,7 +100,6 @@ public class AddBlogFragment extends Fragment {
         btn_addBlog_sendApproval.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                getBlogs();
                 sendApproval();
             }
         });
@@ -108,71 +116,60 @@ public class AddBlogFragment extends Fragment {
                 Toast.makeText(mMainActivity, "Vui lòng tải hỉnh ảnh món ăn", Toast.LENGTH_SHORT).show();
             }
             else{
-                Random rd = new Random();
-                boolean checkIDBlog = true;
-                while (checkIDBlog){
-                    checkIDBlog = false;
-                    int x = rd.nextInt((50000-1000 + 1) + 1000);
-                    IDBlog = "ID-B-" + x;
-                    for (blogs blog: listBlogs
-                    ) {
-                        if (IDBlog.equals(blog.get_id())) {
-                            checkIDBlog = true;
-                            break;
-                        }
-                    }
-                }
+
+
                 String BlogTitle    = edt_addBlog_blogTitle.getText().toString();
                 String BlogAuthor   = user.getFullName();
                 String BlogContent  = edt_addBlog_blogContent.getText().toString();
-                String Status       = "waitingforapproval";
-                SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                Date now = new Date();
-                String Time = df.format(now);
 
-                addBlogCtv(IDBlog, BlogTitle, BlogAuthor, BlogContent, Time, Status);
+                addBlogCtv(BlogTitle, BlogContent);
 
             }
         }
     }
 
-    private void addBlogCtv(String id, String title, String author, String content, String time, String status){
-        APIService.apiService.addBlogCtv(id, title, author, content, time, status).enqueue(new Callback<blogs>() {
-            @Override
-            public void onResponse(Call<blogs> call, Response<blogs> response) {
-                Toast.makeText(mMainActivity, "Gửi phê duyệt blog thành công", Toast.LENGTH_SHORT).show();
+    private void addBlogCtv(String title, String content){
+        String pathImage = RealPathUtil.getRealPath(view.getContext(), mUri);
+        File file = new File(pathImage);
+        OkHttpClient client = new OkHttpClient().newBuilder()
+                .build();
+        MediaType mediaType = MediaType.parse("text/plain");
+        RequestBody body = new MultipartBody.Builder().setType(MultipartBody.FORM)
+                .addFormDataPart("BlogTitle",title)
+                .addFormDataPart("BlogContent", content)
+                .addFormDataPart("Image", file.getName(),
+                RequestBody.create(MEDIA_TYPE_PNG, file))
+                .build();
+        Request request = new Request.Builder()
+                .url("https://eat-clean-nhom04.herokuapp.com/collaborator/create-blog")
+                .method("POST", body)
+                .addHeader("Authorization", "Bearer " + user.getToken())
+                .build();
+        try {
+            Response response = client.newCall(request).execute();
+            if (response.isSuccessful()){
                 edt_addBlog_blogTitle.setText("");
                 edt_addBlog_blogContent.setText("");
-                imgV_addBlog_uploadImage.setImageResource(R.drawable.up);
+                Toast.makeText(view.getContext(),  "Đăng ký thành công", Toast.LENGTH_LONG).show();
             }
-
-            @Override
-            public void onFailure(Call<blogs> call, Throwable t) {
-                Toast.makeText(mMainActivity, "Gửi phê blog ăn thất bại", Toast.LENGTH_SHORT).show();
+            else {
+                String jsonData = response.body().string();
+                JSONObject jsonObject = new JSONObject(jsonData);
+                JSONObject error = jsonObject.getJSONObject("error");
+                Toast.makeText(view.getContext(),  error.toString() , Toast.LENGTH_LONG).show();
             }
-        });
+        } catch (IOException | JSONException e) {
+            e.printStackTrace();
+        }
     }
 
-    private void getBlogs(){
-        APIService.apiService.getBlogs().enqueue(new Callback<List<blogs>>() {
-            @Override
-            public void onResponse(Call<List<blogs>> call, Response<List<blogs>> response) {
-                listBlogs = response.body();
-            }
 
-            @Override
-            public void onFailure(Call<List<blogs>> call, Throwable t) {
-                Toast.makeText(mMainActivity, "Call API Error", Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
 
     private void Mapping() {
         imgV_addBlog_uploadImage    = (ImageView)view.findViewById(R.id.imgV_addBlog_uploadImage);
         edt_addBlog_blogTitle       = (EditText)view.findViewById(R.id.edt_addBlog_blogTitle);
         edt_addBlog_blogContent     = (EditText)view.findViewById(R.id.edt_addBlog_blogContent);
         btn_addBlog_sendApproval    = (Button)view.findViewById(R.id.btn_addBlog_sendApproval);
-        listBlogs                   = new ArrayList<>();
         user                        = DataLocalManager.getUser();
     }
 

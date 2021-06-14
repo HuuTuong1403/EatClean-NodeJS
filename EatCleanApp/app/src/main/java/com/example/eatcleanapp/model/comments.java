@@ -1,36 +1,46 @@
 package com.example.eatcleanapp.model;
 
 public class comments {
-    private String IDUser;
-    private String IDRecipes;
+    private String _id;
+    private String IDRecipe;
     private String Comment;
     private String Username;
     private String Image;
-    private String IDComment;
+    private String IDUser;
 
-    public comments(String IDUser, String IDRecipes, String comment, String username, String image, String IDComment) {
-        this.IDUser = IDUser;
-        this.IDRecipes = IDRecipes;
+
+    public comments(String _id, String IDRecipe, String comment, String username, String image, String IDUser) {
+
+        this._id = _id;
+        this.IDRecipe = IDRecipe;
         Comment = comment;
         Username = username;
         Image = image;
-        this.IDComment = IDComment;
+        this.IDUser = IDUser;
     }
 
-    public String getImage() {
-        return Image;
+    public String get_id() {
+        return _id;
     }
 
-    public void setImage(String image) {
-        Image = image;
+    public void set_id(String _id) {
+        this._id = _id;
     }
 
-    public String getIDComment() {
-        return IDComment;
+    public String getIDRecipe() {
+        return IDRecipe;
     }
 
-    public void setIDComment(String IDComment) {
-        this.IDComment = IDComment;
+    public void setIDRecipe(String IDRecipe) {
+        this.IDRecipe = IDRecipe;
+    }
+
+    public String getComment() {
+        return Comment;
+    }
+
+    public void setComment(String comment) {
+        Comment = comment;
     }
 
     public String getUsername() {
@@ -41,27 +51,19 @@ public class comments {
         Username = username;
     }
 
+    public String getImage() {
+        return Image;
+    }
+
+    public void setImage(String image) {
+        Image = image;
+    }
+
     public String getIDUser() {
         return IDUser;
     }
 
     public void setIDUser(String IDUser) {
         this.IDUser = IDUser;
-    }
-
-    public String getIDRecipes() {
-        return IDRecipes;
-    }
-
-    public void setIDRecipes(String IDRecipes) {
-        this.IDRecipes = IDRecipes;
-    }
-
-    public String getComment() {
-        return Comment;
-    }
-
-    public void setComment(String comment) {
-        Comment = comment;
     }
 }

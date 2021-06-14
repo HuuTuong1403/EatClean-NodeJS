@@ -44,15 +44,24 @@ import com.example.eatcleanapp.ui.home.detail.DetailActivity;
 import com.example.eatcleanapp.ui.home.signin.SignInFragment;
 import com.example.eatcleanapp.ui.nguoidung.data_local.DataLocalManager;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+
 
 public class TabDetailCommentFragment extends Fragment implements IClickListener {
 
@@ -86,16 +95,10 @@ public class TabDetailCommentFragment extends Fragment implements IClickListener
                     Toast.makeText(detailActivity, "Trường nhập không được trống", Toast.LENGTH_LONG).show();
                 }
                 else{
-                    Date date = new Date();
-                    @SuppressLint("SimpleDateFormat")
-                    SimpleDateFormat sf = new SimpleDateFormat("ddMMyyyyHHmmss");
-                    String time = sf.format(date);
-                    IDComment = "ID-C-" + String.valueOf(listComments.size() + 1) + '-' + time;
-                    String IDUser = user.get_id();
                     String IDRecipe = recipe.get_id();
                     String Comment = edt_comment_addComment.getText().toString();
 
-                    sendAddComment(IDUser, IDRecipe, IDComment, Comment);
+                    sendAddComment(IDRecipe, Comment);
                 }
             }
         });
@@ -103,34 +106,86 @@ public class TabDetailCommentFragment extends Fragment implements IClickListener
         return view;
     }
 
-    private void sendAddComment(String IDUser, String IDRecipe, String IDComment, String Comment) {
-        APIService.apiService.addComment(IDUser, IDRecipe,IDComment, Comment).enqueue(new Callback<comments>() {
-            @Override
-            public void onResponse(Call<comments> call, Response<comments> response) {
+    private void sendAddComment(String IDRecipe, String Comment) {
+        users user = DataLocalManager.getUser();
+        edt_comment_addComment.setText("");
+        OkHttpClient client = new OkHttpClient().newBuilder()
+                .build();
+        MediaType mediaType = MediaType.parse("application/json");
+        JSONObject jsonSignIn = new JSONObject();
+        try {
+            jsonSignIn.put("IDRecipe", IDRecipe);
+            jsonSignIn.put("Comment", Comment);
+        } catch (JSONException e) {
+            Toast.makeText(view.getContext(),  e.toString() , Toast.LENGTH_LONG).show();
+        }
+        RequestBody body = RequestBody.create(mediaType, jsonSignIn.toString());
+        Request request = new Request.Builder()
+                .url("https://eat-clean-nhom04.herokuapp.com/me/create-comment")
+                .method("POST", body)
+                .addHeader("Authorization", "Bearer " + user.getToken() )
+                .build();
+        try {
+            Response response = client.newCall(request).execute();
+            String jsonData = response.body().string();
+            JSONObject Jobject = new JSONObject(jsonData);
+            if (response.isSuccessful()){
                 edt_comment_addComment.setText("");
                 GetData();
             }
-
-            @Override
-            public void onFailure(Call<comments> call, Throwable t) {
-                Toast.makeText(detailActivity, "Thêm bình luận thất bại", Toast.LENGTH_SHORT).show();
+            else {
+                JSONObject error = Jobject.getJSONObject("error");
+                Toast.makeText(view.getContext(),  error.toString() , Toast.LENGTH_LONG).show();
             }
-        });
+        } catch (IOException | JSONException e) {
+            e.printStackTrace();
+        }
     }
 
     private void GetData() {
-        APIService.apiService.getCommentByRecipe(recipe.get_id()).enqueue(new Callback<List<comments>>() {
-            @Override
-            public void onResponse(Call<List<comments>> call, Response<List<comments>> response) {
-                listComments = response.body();
+//        APIService.apiService.getCommentByRecipe(recipe.get_id()).enqueue(new Callback<List<comments>>() {
+//            @Override
+//            public void onResponse(Call<List<comments>> call, Response<List<comments>> response) {
+//                listComments = response.body();
+//                commentAdapter.setData(listComments);
+//            }
+//
+//            @Override
+//            public void onFailure(Call<List<comments>> call, Throwable t) {
+//                Toast.makeText(detailActivity, "Call API Error", Toast.LENGTH_SHORT).show();
+//            }
+//        });
+        listComments.clear();
+        OkHttpClient client = new OkHttpClient().newBuilder()
+                .build();
+        Request request = new Request.Builder()
+                .url("https://eat-clean-nhom04.herokuapp.com/me/show-comment-recipe?IDRecipe=" + recipe.get_id())
+                .method("GET", null)
+                .build();
+        try {
+            Response response = client.newCall(request).execute();
+            String jsonData = response.body().string();
+            JSONObject Jobject = new JSONObject(jsonData);
+            if (response.isSuccessful()){
+                //JSONObject data = Jobject.getJSONObject("data");
+                JSONArray myResponse = Jobject.getJSONArray("data");
+                for (int i = 0; i < myResponse.length();i ++){
+                    JSONObject object = myResponse.getJSONObject(i);
+                    comments comment = new comments(
+                            object.getString("_id"),
+                            object.getString("IDRecipe"),
+                            object.getString("Comment"),
+                            object.getString("Username"),
+                            object.getString("Image"),
+                            object.getString("IDUser")
+                    );
+                    listComments.add(comment);
+                }
                 commentAdapter.setData(listComments);
             }
-
-            @Override
-            public void onFailure(Call<List<comments>> call, Throwable t) {
-                Toast.makeText(detailActivity, "Call API Error", Toast.LENGTH_SHORT).show();
-            }
-        });
+        } catch (IOException | JSONException e) {
+            e.printStackTrace();
+        }
     }
 
     private void CreateRecyclerView() {
@@ -208,7 +263,7 @@ public class TabDetailCommentFragment extends Fragment implements IClickListener
                         handler.postDelayed(new Runnable() {
                             @Override
                             public void run() {
-                                deleteComment(listComments.get(position).getIDComment());
+                                deleteComment(listComments.get(position).get_id());
                                 dialog.dismiss();
                             }
                         }, 400);
@@ -237,16 +292,40 @@ public class TabDetailCommentFragment extends Fragment implements IClickListener
     }
 
     private void deleteComment(String IDComment){
-        APIService.apiService.deleteComment(IDComment).enqueue(new Callback<comments>() {
-            @Override
-            public void onResponse(Call<comments> call, Response<comments> response) {
+//        APIService.apiService.deleteComment(IDComment).enqueue(new Callback<comments>() {
+//            @Override
+//            public void onResponse(Call<comments> call, Response<comments> response) {
+//                GetData();
+//            }
+//
+//            @Override
+//            public void onFailure(Call<comments> call, Throwable t) {
+//                Toast.makeText(detailActivity, "Không thể xóa comment", Toast.LENGTH_SHORT).show();
+//            }
+//        });
+        users user = DataLocalManager.getUser();
+        OkHttpClient client = new OkHttpClient().newBuilder()
+                .build();
+        MediaType mediaType = MediaType.parse("text/plain");
+        RequestBody body = RequestBody.create(mediaType, "");
+        Request request = new Request.Builder()
+                .url("https://eat-clean-nhom04.herokuapp.com/me/delete-comment?id=" + IDComment)
+                .method("DELETE", body)
+                .addHeader("Authorization", "Bearer " + user.getToken())
+                .build();
+        try {
+            Response response = client.newCall(request).execute();
+            String jsonData = response.body().string();
+            JSONObject Jobject = new JSONObject(jsonData);
+            if (response.isSuccessful()){
                 GetData();
             }
-
-            @Override
-            public void onFailure(Call<comments> call, Throwable t) {
-                Toast.makeText(detailActivity, "Không thể xóa comment", Toast.LENGTH_SHORT).show();
+            else {
+                JSONObject error = Jobject.getJSONObject("error");
+                Toast.makeText(view.getContext(),  error.toString() , Toast.LENGTH_LONG).show();
             }
-        });
+        } catch (IOException | JSONException e) {
+            e.printStackTrace();
+        }
     }
 }

@@ -20,14 +20,22 @@ import com.example.eatcleanapp.MainActivity;
 import com.example.eatcleanapp.R;
 import com.example.eatcleanapp.model.recipeimages;
 import com.example.eatcleanapp.model.recipes;
+import com.example.eatcleanapp.model.users;
 import com.example.eatcleanapp.ui.home.detail.DetailActivity;
+import com.example.eatcleanapp.ui.nguoidung.data_local.DataLocalManager;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class ListAddRecipeFragment extends Fragment implements IClickListener {
 
@@ -36,7 +44,7 @@ public class ListAddRecipeFragment extends Fragment implements IClickListener {
     private UpdateRecipeAdapter updateRecipeAdapter;
     private List<recipes> listRecipes;
     private MainActivity mMainActivity;
-    private List<recipeimages> listRecipeImage;
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -50,43 +58,49 @@ public class ListAddRecipeFragment extends Fragment implements IClickListener {
         return view;
     }
 
-    private void GetImage() {
-        APIService.apiService.getImageRecipe().enqueue(new Callback<List<recipeimages>>() {
-            @Override
-            public void onResponse(Call<List<recipeimages>> call, Response<List<recipeimages>> response) {
-                listRecipeImage = response.body();
-                for(int i = 0; i < listRecipes.size(); i++){
-                    for(int j = 0; j < listRecipeImage.size(); j++){
-                        if(listRecipes.get(i).get_id().equals(listRecipeImage.get(j).getIDRecipes())){
-                            listRecipes.get(i).setImageMain(listRecipeImage.get(j).getRecipesImages());
-                            break;
-                        }
-                    }
+
+
+    private void GetData() {
+        users user = DataLocalManager.getUser();
+        OkHttpClient client = new OkHttpClient().newBuilder()
+                .build();
+        Request request = new Request.Builder()
+                .url("https://eat-clean-nhom04.herokuapp.com/collaborator/show-my-recipes")
+                .method("GET", null)
+                .addHeader("Authorization", "Bearer " + user.getToken())
+                .build();
+        try {
+            Response response = client.newCall(request).execute();
+            String jsonData = response.body().string();
+            JSONObject Jobject = new JSONObject(jsonData);
+            if (response.isSuccessful()){
+                //JSONObject data = Jobject.getJSONObject("data");
+                JSONArray myResponse = Jobject.getJSONArray("data");
+                for (int i = 0; i < myResponse.length();i ++){
+                    JSONObject object = myResponse.getJSONObject(i);
+                    recipes recipe = new recipes(
+                            object.getString("_id"),
+                            object.getString("RecipesTitle"),
+                            object.getString("RecipesAuthor"),
+                            object.getString("RecipesContent"),
+                            object.getString("NutritionalIngredients"),
+                            object.getString("Ingredients"),
+                            object.getString("Steps"),
+                            object.getString("IDAuthor"),
+                            object.getString("Status"),
+                            object.getString("ImageMain")
+                    );
+                    listRecipes.add(recipe);
                 }
                 updateRecipeAdapter.setData(listRecipes);
             }
-
-            @Override
-            public void onFailure(Call<List<recipeimages>> call, Throwable t) {
-                Toast.makeText(mMainActivity, "Call Api Error", Toast.LENGTH_SHORT).show();
+            else {
+                JSONObject error = Jobject.getJSONObject("error");
+                Toast.makeText(view.getContext(),  error.toString() , Toast.LENGTH_LONG).show();
             }
-        });
-    }
-
-    private void GetData() {
-        APIService.apiService.getRecipesNoImage().enqueue(new Callback<List<recipes>>() {
-            @Override
-            public void onResponse(Call<List<recipes>> call, Response<List<recipes>> response) {
-                listRecipes = response.body();
-                updateRecipeAdapter.setData(listRecipes);
-                GetImage();
-            }
-
-            @Override
-            public void onFailure(Call<List<recipes>> call, Throwable t) {
-                Toast.makeText(mMainActivity, "Call Api Error", Toast.LENGTH_SHORT).show();
-            }
-        });
+        } catch (IOException | JSONException e) {
+            e.printStackTrace();
+        }
     }
 
     private void CreateRecyclerView() {
@@ -98,7 +112,6 @@ public class ListAddRecipeFragment extends Fragment implements IClickListener {
     private void Mapping() {
         listRecipes = new ArrayList<>();
         rcvUpdateRecipe = view.findViewById(R.id.list_updateRecipe);
-        listRecipeImage = new ArrayList<>();
     }
 
     @Override

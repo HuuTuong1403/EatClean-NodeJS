@@ -18,17 +18,26 @@ import com.example.eatcleanapp.MainActivity;
 import com.example.eatcleanapp.R;
 import com.example.eatcleanapp.model.blogimages;
 import com.example.eatcleanapp.model.blogs;
+import com.example.eatcleanapp.model.users;
 import com.example.eatcleanapp.ui.home.LoadingDialog;
 import com.example.eatcleanapp.ui.home.detail.DetailActivity;
 import com.example.eatcleanapp.ui.home.tabHome.blogs.BlogsAdapter;
+import com.example.eatcleanapp.ui.nguoidung.data_local.DataLocalManager;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 import retrofit2.Call;
 import retrofit2.Callback;
-import retrofit2.Response;
 
 public class ListAddBlogFragment extends Fragment implements IClickListener {
 
@@ -59,43 +68,51 @@ public class ListAddBlogFragment extends Fragment implements IClickListener {
     }
 
     private void GetData(){
-        APIService.apiService.getBlogs().enqueue(new Callback<List<blogs>>() {
-            @Override
-            public void onResponse(Call<List<blogs>> call, Response<List<blogs>> response) {
-                listBlogs = response.body();
-                mBlogsAdapter.setData(listBlogs);
-                GetImage();
-            }
-
-            @Override
-            public void onFailure(Call<List<blogs>> call, Throwable t) {
-                Toast.makeText(mMainActivity, "Call Api Error", Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-
-    private void GetImage(){
-        APIService.apiService.getImageBlog().enqueue(new Callback<List<blogimages>>() {
-            @Override
-            public void onResponse(Call<List<blogimages>> call, Response<List<blogimages>> response) {
-                listBlogsImage = response.body();
-                for(int i = 0; i < listBlogs.size(); i++){
-                    for(int j = 0; j < listBlogsImage.size(); j++){
-                        if(listBlogs.get(i).get_id().equals(listBlogsImage.get(j).getIDBlog())){
-                            listBlogs.get(i).setImageMain(listBlogsImage.get(j).getBlogImages());
-                            break;
-                        }
-                    }
+        users user = DataLocalManager.getUser();
+        OkHttpClient client = new OkHttpClient().newBuilder()
+                .build();
+        Request request = new Request.Builder()
+                .url("https://eat-clean-nhom04.herokuapp.com/collaborator/show-my-blogs")
+                .method("GET", null)
+                .addHeader("Authorization", "Bearer " + user.getToken())
+                .build();
+        try {
+            Response response = client.newCall(request).execute();
+            String jsonData = response.body().string();
+            JSONObject Jobject = new JSONObject(jsonData);
+            if (response.isSuccessful()){
+                //JSONObject data = Jobject.getJSONObject("data");
+                JSONArray myResponse = Jobject.getJSONArray("data");
+                for (int i = 0; i < myResponse.length();i ++){
+                    JSONObject object = myResponse.getJSONObject(i);
+                    blogs blog = new blogs(
+                            object.getString("_id"),
+                            object.getString("BlogTitle"),
+                            object.getString("BlogAuthor"),
+                            object.getString("BlogContent"),
+                            object.getString("IDAuthor"),
+                            object.getString("ImageMain"),
+                            object.getString("Status"),
+                            object.getString("createdAt")
+                    );
+                    String time = blog.getCreatedAt().toString();
+                    int endIndex = time.indexOf("T");
+                    blog.setCreatedAt(time.substring(0,endIndex));
+                    listBlogs.add(blog);
                 }
                 mBlogsAdapter.setData(listBlogs);
             }
-
-            @Override
-            public void onFailure(Call<List<blogimages>> call, Throwable t) {
-                Toast.makeText(mMainActivity, "Call Api Error", Toast.LENGTH_SHORT).show();
+            else {
+                JSONObject error = Jobject.getJSONObject("error");
+                Toast.makeText(view.getContext(),  error.toString() , Toast.LENGTH_LONG).show();
             }
-        });
+        } catch (IOException | JSONException e) {
+            e.printStackTrace();
+        }
+        mBlogsAdapter.setData(listBlogs);
     }
+
+
 
     private void Mapping() {
         listBlogs = new ArrayList<>();
