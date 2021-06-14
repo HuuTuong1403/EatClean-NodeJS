@@ -1,14 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:id="@+id/menu_notification"
-        android:title="Thông báo"
-        android:icon="@drawable/ic_outline_notification"/>
-    <item android:id="@+id/menu_blog_not_approval"
-        android:title="Blog chưa duyệt"
-        android:icon="@drawable/outline_article_24"/>
+
     <item android:id="@+id/menu_recipes24_not_approval"
         android:title="Công thức chưa duyệt"
         android:icon="@drawable/outline_menu_book_24"/>
+    <item android:id="@+id/menu_blog_not_approval"
+        android:title="Blog chưa duyệt"
+        android:icon="@drawable/outline_article_24"/>
     <item android:id="@+id/nav_bottom_settings"
         android:title="cài đặt"
         android:icon="@drawable/ic_outline_settings"/>

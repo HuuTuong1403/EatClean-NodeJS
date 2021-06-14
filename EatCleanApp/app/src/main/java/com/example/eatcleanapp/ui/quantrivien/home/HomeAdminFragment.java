@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.eatcleanapp.R;
+import com.google.android.material.badge.BadgeDrawable;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import org.jetbrains.annotations.NotNull;
@@ -46,17 +47,14 @@ public class HomeAdminFragment extends Fragment {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 switch(item.getItemId()){
-                    case R.id.menu_notification:
+                    case R.id.menu_recipes24_not_approval:
                         viewPager.setCurrentItem(0);
                         break;
                     case R.id.menu_blog_not_approval:
                         viewPager.setCurrentItem(1);
                         break;
-                    case R.id.menu_recipes24_not_approval:
-                        viewPager.setCurrentItem(2);
-                        break;
                     case R.id.nav_bottom_settings:
-                        viewPager.setCurrentItem(3);
+                        viewPager.setCurrentItem(2);
                         break;
                 }
                 return true;
@@ -73,15 +71,12 @@ public class HomeAdminFragment extends Fragment {
             public void onPageSelected(int position) {
                 switch(position){
                     case 0:
-                        bottomNavigationView.getMenu().findItem(R.id.menu_notification).setChecked(true);
+                        bottomNavigationView.getMenu().findItem(R.id.menu_recipes24_not_approval).setChecked(true);
                         break;
                     case 1:
                         bottomNavigationView.getMenu().findItem(R.id.menu_blog_not_approval).setChecked(true);
                         break;
                     case 2:
-                        bottomNavigationView.getMenu().findItem(R.id.menu_recipes24_not_approval).setChecked(true);
-                        break;
-                    case 3:
                         bottomNavigationView.getMenu().findItem(R.id.nav_bottom_settings).setChecked(true);
                         break;
                 }

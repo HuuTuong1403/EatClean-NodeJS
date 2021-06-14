@@ -119,6 +119,7 @@ public class SignInFragment extends Fragment {
                                     bundle.putSerializable("object_user", userLogin);
                                     intent.putExtras(bundle);
                                     startActivity(intent);
+                                    mMainActivity.overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_right);
                                     getActivity().finish();
                                     break;
                                 }

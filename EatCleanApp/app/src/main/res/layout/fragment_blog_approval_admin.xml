@@ -3,12 +3,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.quantrivien.home.HomeAdminFragment">
+    tools:context=".ui.quantrivien.home.BlogApprovalAdminFragment">
 
-    <TextView
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/list_blogs_approval"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="Blog Fragment"
-        android:textSize="20sp"/>
+        android:layout_height="match_parent"/>
 
 </FrameLayout>

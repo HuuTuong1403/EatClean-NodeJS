@@ -3,12 +3,57 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.quantrivien.home.HomeAdminFragment">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".ui.quantrivien.home.SettingAdminFragment">
 
-    <TextView
+    <androidx.cardview.widget.CardView
+        android:layout_marginTop="15dp"
+        android:layout_marginBottom="15dp"
+        app:cardCornerRadius="15dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        android:backgroundTint="@color/gray"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="Setting Fragment"
-        android:textSize="20sp"/>
+        android:layout_height="wrap_content"
+        android:elevation="10dp">
+        <LinearLayout
+            android:padding="8dp"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <LinearLayout
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="15dp"
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+                <ImageView
+                    android:layout_marginStart="5dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_person_big"/>
+                <TextView
+                    android:id="@+id/setting_admin_txv_show_isLogIn"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:textSize="16sp"
+                    android:textColor="@color/black"
+                    android:text=""
+                    android:layout_gravity="center"
+                    android:layout_marginStart="10dp"/>
+            </LinearLayout>
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/setting_admin_btn_isLogIn"
+                android:layout_width="match_parent"
+                android:layout_marginBottom="8dp"
+                android:layout_height="wrap_content"
+                android:text="Đăng xuất"
+                android:textAllCaps="true"
+                android:backgroundTint="@color/bg_nav"
+                android:background="@drawable/custom_button"
+                android:textColor="@color/black"/>
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
 
 </RelativeLayout>

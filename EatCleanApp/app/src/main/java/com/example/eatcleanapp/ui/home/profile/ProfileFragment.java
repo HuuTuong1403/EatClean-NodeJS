@@ -58,6 +58,9 @@ import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.PermissionRequestErrorListener;
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -69,10 +72,11 @@ import java.util.List;
 import de.hdodenhof.circleimageview.CircleImageView;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
 import okhttp3.RequestBody;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import okhttp3.Response;
+
 
 public class ProfileFragment extends Fragment {
 
@@ -85,7 +89,7 @@ public class ProfileFragment extends Fragment {
     private TextView txv_profile_userName, txv_profile_email, txv_profile_fullName, txv_profile_title_fullName, txv_profile_soDienThoai;
     private Uri mUri;
     private LoadingDialog loadingDialog;
-
+    private static final MediaType MEDIA_TYPE_PNG = MediaType.parse("image/*");
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -142,7 +146,6 @@ public class ProfileFragment extends Fragment {
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                users test = user;
                 Intent intent = new Intent(mSubActivity, MainActivity.class);
                 startActivity(intent);
                 mSubActivity.finish();
@@ -191,22 +194,34 @@ public class ProfileFragment extends Fragment {
         String strRealPath = RealPathUtil.getRealPath(view.getContext(), mUri);
         Log.e("AAA", strRealPath);
         File file = new File(strRealPath);
-        RequestBody requestBodyAvatar = RequestBody.create(MediaType.parse("multipart/form-data"), file);
-        MultipartBody.Part multipartBodyAvatar = MultipartBody.Part.createFormData("fileToUpload", file.getName(), requestBodyAvatar);
-
-        APIService.apiService.uploadImage(IDUser, multipartBodyAvatar).enqueue(new Callback<users>() {
-            @Override
-            public void onResponse(Call<users> call, Response<users> response) {
+        OkHttpClient client = new OkHttpClient().newBuilder()
+                .build();
+        MediaType mediaType = MediaType.parse("text/plain");
+        RequestBody body = new MultipartBody.Builder().setType(MultipartBody.FORM)
+                .addFormDataPart("Image", file.getName(),
+                        RequestBody.create(MEDIA_TYPE_PNG, file))
+                .build();
+        Request request = new Request.Builder()
+                .url("https://eat-clean-nhom04.herokuapp.com/me/edit-avatar")
+                .method("PUT", body)
+                .addHeader("Authorization", "Bearer " + user.getToken())
+                .build();
+        try {
+            Response response = client.newCall(request).execute();
+            if (response.isSuccessful()){
                 loadingDialog.dismissDialog();
                 Toast.makeText(mSubActivity, "Lưu hình ảnh thành công", Toast.LENGTH_SHORT).show();
             }
-
-            @Override
-            public void onFailure(Call<users> call, Throwable t) {
+            else {
+                String jsonData = response.body().string();
+                JSONObject jsonObject = new JSONObject(jsonData);
+                JSONObject error = jsonObject.getJSONObject("error");
                 loadingDialog.dismissDialog();
-                Toast.makeText(mSubActivity, "Đã xảy ra lỗi khi thực hiện", Toast.LENGTH_SHORT).show();
+                Toast.makeText(mSubActivity,  error.toString() , Toast.LENGTH_LONG).show();
             }
-        });
+        } catch (IOException | JSONException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
