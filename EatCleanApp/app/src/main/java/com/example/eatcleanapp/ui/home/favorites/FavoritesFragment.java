@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
 import com.example.eatcleanapp.API.APIService;
+import com.example.eatcleanapp.CustomAlert.CustomAlertActivity;
 import com.example.eatcleanapp.IClickListener;
 import com.example.eatcleanapp.MainActivity;
 import com.example.eatcleanapp.R;
@@ -55,20 +56,26 @@ public class FavoritesFragment extends Fragment implements IClickListener {
     private RecipesAdapter mRecipesAdapter;
     private List<recipes> listFavoritesRecipes;
     private LoadingDialog loadingDialog;
-
+    private Handler hander;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         mMainActivity = (MainActivity) getActivity();
+        loadingDialog = new LoadingDialog(mMainActivity);
         userIsLogin = DataLocalManager.getUser();
+        hander = new Handler();
         if(userIsLogin != null){
             view = inflater.inflate(R.layout.fragment_favorites, container, false);
             Mapping();
             CreateViewRecycler();
             loadingDialog.startLoadingDialog();
-            GetData();
+            hander.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    GetData();
+                }
+            }, 500);
             rcv_Favorites_Recipes.setAdapter(mRecipesAdapter);
-            Handler handler = new Handler();
         }
         else{
             view = inflater.inflate(R.layout.layout_favorites_no_user, container, false);
@@ -102,7 +109,7 @@ public class FavoritesFragment extends Fragment implements IClickListener {
     }
 
     public void GetData (){
-      OkHttpClient client = new OkHttpClient().newBuilder()
+        OkHttpClient client = new OkHttpClient().newBuilder()
                 .build();
         Request request = new Request.Builder()
                 .url("https://eat-clean-nhom04.herokuapp.com/me/show-recipe-favorite")
@@ -133,14 +140,27 @@ public class FavoritesFragment extends Fragment implements IClickListener {
                     listFavoritesRecipes.add(recipe);
                 }
                 mRecipesAdapter.setData(listFavoritesRecipes);
-                loadingDialog.dismissDialog();
             }
             else {
                 JSONObject error = Jobject.getJSONObject("error");
-                Toast.makeText(view.getContext(),  error.toString() , Toast.LENGTH_LONG).show();
+                CustomAlertActivity customAlertActivity = new CustomAlertActivity.Builder()
+                        .setActivity(mMainActivity)
+                        .setTitle("Thông báo")
+                        .setMessage("Không thể tải dữ liệu")
+                        .setType("error")
+                        .Build();
+                customAlertActivity.showDialog();
             }
+            loadingDialog.dismissDialog();
         } catch (IOException | JSONException e) {
-            Toast.makeText(view.getContext(),   e.toString() , Toast.LENGTH_LONG).show();
+            CustomAlertActivity customAlertActivity = new CustomAlertActivity.Builder()
+                    .setActivity(mMainActivity)
+                    .setTitle("Thông báo")
+                    .setMessage("Đã xảy ra lỗi!!!")
+                    .setType("error")
+                    .Build();
+            customAlertActivity.showDialog();
+            loadingDialog.dismissDialog();
         }
     }
 

@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.eatcleanapp.API.APIService;
+import com.example.eatcleanapp.CustomAlert.CustomAlertActivity;
 import com.example.eatcleanapp.IClickListener;
 import com.example.eatcleanapp.R;
 import com.example.eatcleanapp.model.blogimages;
@@ -57,13 +58,13 @@ public class BlogApprovalAdminFragment extends Fragment implements IClickListene
         user = DataLocalManager.getUser();
         Mapping();
         CreateRecyclerView();
-        loadingDialog.startLoadingDialog();
         GetData();
         rcvApprovalBlogs.setAdapter(approvalBlogAdapter);
         return view;
     }
 
     private void GetData() {
+        loadingDialog.startLoadingDialog();
         OkHttpClient client = new OkHttpClient().newBuilder()
                 .build();
         Request request = new Request.Builder()
@@ -96,17 +97,28 @@ public class BlogApprovalAdminFragment extends Fragment implements IClickListene
                 }
                 setBadge();
                 approvalBlogAdapter.setData(listBlogs);
-                loadingDialog.dismissDialog();
             }
             else {
-                JSONObject error = Jobject.getJSONObject("error");
-                Toast.makeText(view.getContext(),  error.toString() , Toast.LENGTH_LONG).show();
+                CustomAlertActivity customAlertActivity = new CustomAlertActivity.Builder()
+                        .setActivity(adminActivity)
+                        .setTitle("Thông báo")
+                        .setMessage("Không lấy được dữ liệu")
+                        .setType("error")
+                        .Build();
+                customAlertActivity.showDialog();
             }
-
+            loadingDialog.dismissDialog();
         } catch (IOException | JSONException e) {
             e.printStackTrace();
+            CustomAlertActivity customAlertActivity = new CustomAlertActivity.Builder()
+                    .setActivity(adminActivity)
+                    .setTitle("Thông báo")
+                    .setMessage("Đã xảy ra lỗi!!!")
+                    .setType("error")
+                    .Build();
+            customAlertActivity.showDialog();
+            loadingDialog.dismissDialog();
         }
-
     }
 
 

@@ -1,5 +1,6 @@
 package com.example.eatcleanapp.ui.quantrivien.home;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -13,7 +14,6 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.eatcleanapp.R;
-import com.google.android.material.badge.BadgeDrawable;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import org.jetbrains.annotations.NotNull;
@@ -44,6 +44,7 @@ public class HomeAdminFragment extends Fragment {
         viewPager.setAdapter(viewPagerAdapter);
 
         bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
+            @SuppressLint("NonConstantResourceId")
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 switch(item.getItemId()){

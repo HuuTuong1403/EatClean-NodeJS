@@ -1,9 +1,12 @@
 package com.example.eatcleanapp.ui.quantrivien.home.adapter;
 
 import android.content.Context;
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -14,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.example.eatcleanapp.API.APIService;
+import com.example.eatcleanapp.CustomAlert.CustomAlertActivity;
 import com.example.eatcleanapp.IClickListener;
 import com.example.eatcleanapp.R;
 import com.example.eatcleanapp.model.blogs;
@@ -49,6 +53,8 @@ public class ApprovalBlogAdapter extends RecyclerView.Adapter<ApprovalBlogAdapte
     private List<blogs> listBlogs;
     private BottomNavigationView bottomNavigationView;
     private users user  = DataLocalManager.getUser();
+    private LoadingDialog loadingDialog;
+
     public ApprovalBlogAdapter(Context context, AdminActivity adminActivity, IClickListener iClickListener) {
         this.context = context;
         this.adminActivity = adminActivity;
@@ -79,32 +85,6 @@ public class ApprovalBlogAdapter extends RecyclerView.Adapter<ApprovalBlogAdapte
         String date = FormatDate(blog.getCreatedAt());
         holder.txv_approvalBlog_Time.setText("Ngày đăng: " + date);
 
-        bottomNavigationView = adminActivity.findViewById(R.id.bottom_menu_admin);
-
-        holder.btn_approvalBlog_Approval.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                approvalBlog(listBlogs.get(position).get_id(), position);
-                BadgeDrawable badgeDrawable = bottomNavigationView.getOrCreateBadge(R.id.menu_blog_not_approval);
-                badgeDrawable.setNumber(listBlogs.size());
-                badgeDrawable.setVisible(true);
-                notifyItemRemoved(position);
-                notifyDataSetChanged();
-            }
-        });
-
-        holder.btn_approvalBlog_Deny.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                denyBlog(listBlogs.get(position).get_id(), position);
-                BadgeDrawable badgeDrawable = bottomNavigationView.getOrCreateBadge(R.id.menu_blog_not_approval);
-                badgeDrawable.setNumber(listBlogs.size());
-                badgeDrawable.setVisible(true);
-                notifyItemRemoved(position);
-                notifyDataSetChanged();
-            }
-        });
-
     }
 
     @Override
@@ -113,106 +93,6 @@ public class ApprovalBlogAdapter extends RecyclerView.Adapter<ApprovalBlogAdapte
             return listBlogs.size();
         }
         return 0;
-    }
-
-    private void denyBlog(String IDBlog, int position){
-//        APIService.apiService.denyBlog(IDBlog).enqueue(new Callback<blogs>() {
-//            @Override
-//            public void onResponse(Call<blogs> call, Response<blogs> response) {
-//                CustomAlertActivity customAlertActivity = new CustomAlertActivity.Builder()
-//                        .setActivity(adminActivity)
-//                        .setTitle("Thông báo")
-//                        .setMessage("Từ chối phê duyệt blog thành công")
-//                        .setType("success")
-//                        .Build();
-//                customAlertActivity.showDialog();
-//            }
-//
-//            @Override
-//            public void onFailure(Call<blogs> call, Throwable t) {
-//                CustomAlertActivity customAlertActivity = new CustomAlertActivity.Builder()
-//                        .setActivity(adminActivity)
-//                        .setTitle("Thông báo")
-//                        .setMessage("Từ chối phê duyệt blog thất bại")
-//                        .setType("success")
-//                        .Build();
-//                customAlertActivity.showDialog();
-//            }
-//        });
-        OkHttpClient client = new OkHttpClient().newBuilder()
-                .build();
-        MediaType mediaType = MediaType.parse("text/plain");
-        RequestBody body = RequestBody.create(mediaType, "");
-        Request request = new Request.Builder()
-                .url("https://eat-clean-nhom04.herokuapp.com/admin/delete-blog?id=" + IDBlog)
-                .method("PUT", body)
-                .addHeader("Authorization", "Bearer " + user.getToken())
-                .build();
-        try {
-            Response response = client.newCall(request).execute();
-            if (response.isSuccessful()){
-                listBlogs.remove(listBlogs.get(position));
-                Toast.makeText(context,  "Từ chối phê duyệt blog thành công", Toast.LENGTH_LONG).show();
-            }
-            else {
-                String jsonData = response.body().string();
-                JSONObject jsonObject = new JSONObject(jsonData);
-                JSONObject error = jsonObject.getJSONObject("error");
-                Toast.makeText(context,  error.toString() , Toast.LENGTH_LONG).show();
-            }
-        } catch (IOException | JSONException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void approvalBlog(String IDBlog, int position){
-//        APIService.apiService.approveBlog(IDBlog).enqueue(new Callback<blogs>() {
-//            @Override
-//            public void onResponse(Call<blogs> call, Response<blogs> response) {
-//                CustomAlertActivity customAlertActivity = new CustomAlertActivity.Builder()
-//                        .setActivity(adminActivity)
-//                        .setTitle("Thông báo")
-//                        .setMessage("Phê duyệt blog thành công")
-//                        .setType("success")
-//                        .Build();
-//                customAlertActivity.showDialog();
-//            }
-//
-//            @Override
-//            public void onFailure(Call<blogs> call, Throwable t) {
-//                CustomAlertActivity customAlertActivity = new CustomAlertActivity.Builder()
-//                        .setActivity(adminActivity)
-//                        .setTitle("Thông báo")
-//                        .setMessage("Phê duyệt blog thất bại")
-//                        .setType("error")
-//                        .Build();
-//                customAlertActivity.showDialog();
-//            }
-//        });
-        OkHttpClient client = new OkHttpClient().newBuilder()
-                .build();
-        MediaType mediaType = MediaType.parse("text/plain");
-        RequestBody body = RequestBody.create(mediaType, "");
-        Request request = new Request.Builder()
-                .url("https://eat-clean-nhom04.herokuapp.com/admin/confirm-blog?id=" + IDBlog)
-                .method("POST", body)
-                .addHeader("Authorization", "Bearer " + user.getToken())
-                .build();
-        try {
-            Response response = client.newCall(request).execute();
-            if (response.isSuccessful()){
-                listBlogs.remove(listBlogs.get(position));
-                Toast.makeText(context,  "Phê duyệt blog thành công", Toast.LENGTH_LONG).show();
-            }
-            else {
-                String jsonData = response.body().string();
-                JSONObject jsonObject = new JSONObject(jsonData);
-                JSONObject error = jsonObject.getJSONObject("error");
-                Toast.makeText(context,  error.toString() , Toast.LENGTH_LONG).show();
-            }
-        } catch (IOException | JSONException e) {
-            e.printStackTrace();
-        }
     }
 
     private String FormatDate(String date){
@@ -242,6 +122,39 @@ public class ApprovalBlogAdapter extends RecyclerView.Adapter<ApprovalBlogAdapte
             btn_approvalBlog_Deny = (Button)itemView.findViewById(R.id.btn_approvalBlog_Deny);
             btn_approvalBlog_Approval = (Button)itemView.findViewById(R.id.btn_approvalBlog_Approval);
 
+            Animation animScale = AnimationUtils.loadAnimation(itemView.getContext(), R.anim.anim_scale);
+            Handler handler = new Handler();
+
+            bottomNavigationView = adminActivity.findViewById(R.id.bottom_menu_admin);
+            loadingDialog = new LoadingDialog(adminActivity);
+            btn_approvalBlog_Approval.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    loadingDialog.startLoadingDialog();
+                    v.startAnimation(animScale);
+                    handler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            approvalBlog(listBlogs.get(getAdapterPosition()).get_id(), getAdapterPosition());
+                        }
+                    }, 400);
+                }
+            });
+
+            btn_approvalBlog_Deny.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    loadingDialog.startLoadingDialog();
+                    v.startAnimation(animScale);
+                    handler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            denyBlog(listBlogs.get(getAdapterPosition()).get_id(), getAdapterPosition());
+                        }
+                    }, 400);
+                }
+            });
+
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -249,6 +162,112 @@ public class ApprovalBlogAdapter extends RecyclerView.Adapter<ApprovalBlogAdapte
                 }
             });
 
+        }
+    }
+
+    private void denyBlog(String IDBlog, int position){
+        OkHttpClient client = new OkHttpClient().newBuilder()
+                .build();
+        MediaType mediaType = MediaType.parse("text/plain");
+        RequestBody body = RequestBody.create(mediaType, "");
+        Request request = new Request.Builder()
+                .url("https://eat-clean-nhom04.herokuapp.com/admin/delete-blog?id=" + IDBlog)
+                .method("PUT", body)
+                .addHeader("Authorization", "Bearer " + user.getToken())
+                .build();
+        try {
+            Response response = client.newCall(request).execute();
+            if (response.isSuccessful()){
+                listBlogs.remove(listBlogs.get(position));
+                BadgeDrawable badgeDrawable = bottomNavigationView.getOrCreateBadge(R.id.menu_blog_not_approval);
+                badgeDrawable.setNumber(listBlogs.size());
+                badgeDrawable.setVisible(true);
+                notifyItemRemoved(position);
+                notifyDataSetChanged();
+                CustomAlertActivity customAlertActivity = new CustomAlertActivity.Builder()
+                        .setActivity(adminActivity)
+                        .setTitle("Thông báo")
+                        .setMessage("Từ chối phê duyệt blog thành công")
+                        .setType("success")
+                        .Build();
+                customAlertActivity.showDialog();
+            }
+            else {
+                String jsonData = response.body().string();
+                JSONObject jsonObject = new JSONObject(jsonData);
+                JSONObject error = jsonObject.getJSONObject("error");
+                CustomAlertActivity customAlertActivity = new CustomAlertActivity.Builder()
+                        .setActivity(adminActivity)
+                        .setTitle("Thông báo")
+                        .setMessage("Từ chối phê duyệt blog thất bại")
+                        .setType("success")
+                        .Build();
+                customAlertActivity.showDialog();
+            }
+            loadingDialog.dismissDialog();
+        } catch (IOException | JSONException e) {
+            CustomAlertActivity customAlertActivity = new CustomAlertActivity.Builder()
+                    .setActivity(adminActivity)
+                    .setTitle("Thông báo")
+                    .setMessage("Đã xảy ra lỗi!!!")
+                    .setType("error")
+                    .Build();
+            customAlertActivity.showDialog();
+            e.printStackTrace();
+            loadingDialog.dismissDialog();
+        }
+    }
+
+    private void approvalBlog(String IDBlog, int position){
+        OkHttpClient client = new OkHttpClient().newBuilder()
+                .build();
+        MediaType mediaType = MediaType.parse("text/plain");
+        RequestBody body = RequestBody.create(mediaType, "");
+        Request request = new Request.Builder()
+                .url("https://eat-clean-nhom04.herokuapp.com/admin/confirm-blog?id=" + IDBlog)
+                .method("POST", body)
+                .addHeader("Authorization", "Bearer " + user.getToken())
+                .build();
+        try {
+            Response response = client.newCall(request).execute();
+            if (response.isSuccessful()){
+                listBlogs.remove(listBlogs.get(position));
+                BadgeDrawable badgeDrawable = bottomNavigationView.getOrCreateBadge(R.id.menu_blog_not_approval);
+                badgeDrawable.setNumber(listBlogs.size());
+                badgeDrawable.setVisible(true);
+                notifyItemRemoved(position);
+                notifyDataSetChanged();
+                CustomAlertActivity customAlertActivity = new CustomAlertActivity.Builder()
+                        .setActivity(adminActivity)
+                        .setTitle("Thông báo")
+                        .setMessage("Phê duyệt blog thành công")
+                        .setType("success")
+                        .Build();
+                customAlertActivity.showDialog();
+            }
+            else {
+                String jsonData = response.body().string();
+                JSONObject jsonObject = new JSONObject(jsonData);
+                JSONObject error = jsonObject.getJSONObject("error");
+                CustomAlertActivity customAlertActivity = new CustomAlertActivity.Builder()
+                        .setActivity(adminActivity)
+                        .setTitle("Thông báo")
+                        .setMessage("Phê duyệt blog thất bại")
+                        .setType("error")
+                        .Build();
+                customAlertActivity.showDialog();
+            }
+            loadingDialog.dismissDialog();
+        } catch (IOException | JSONException e) {
+            CustomAlertActivity customAlertActivity = new CustomAlertActivity.Builder()
+                    .setActivity(adminActivity)
+                    .setTitle("Thông báo")
+                    .setMessage("Đã xảy ra lỗi!!!")
+                    .setType("error")
+                    .Build();
+            customAlertActivity.showDialog();
+            e.printStackTrace();
+            loadingDialog.dismissDialog();
         }
     }
 

@@ -2,6 +2,7 @@ package com.example.eatcleanapp.ui.quantrivien.home;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.StrictMode;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,6 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.eatcleanapp.API.APIService;
+import com.example.eatcleanapp.CustomAlert.CustomAlertActivity;
 import com.example.eatcleanapp.IClickListener;
 import com.example.eatcleanapp.R;
 import com.example.eatcleanapp.model.recipeimages;
@@ -48,22 +50,34 @@ public class RecipesApprovalAdminFragment extends Fragment implements IClickList
     private List<recipeimages> listRecipeImage;
     private BottomNavigationView bottomNavigationView;
     private users user;
+    private LoadingDialog loadingDialog;
+    private Handler handler;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy((policy));
         mAdminActivity = (AdminActivity) getActivity();
+        loadingDialog = new LoadingDialog(mAdminActivity);
+        handler = new Handler();
         view = inflater.inflate(R.layout.fragment_recipes_approval_admin, container, false);
         user = DataLocalManager.getUser();
         Mapping();
         CreateRecyclerView();
-        GetData();
+        loadingDialog.startLoadingDialog();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                GetData();
+            }
+        }, 400);
+
         rcvApprovalRecipes.setAdapter(approvalRecipeAdapter);
         return view;
     }
 
-    public void GetData() {
+    public void GetData(){
         OkHttpClient client = new OkHttpClient().newBuilder()
                 .build();
         Request request = new Request.Builder()
@@ -97,12 +111,25 @@ public class RecipesApprovalAdminFragment extends Fragment implements IClickList
                 approvalRecipeAdapter.setData(listRecipes);
             }
             else {
-                JSONObject error = Jobject.getJSONObject("error");
-                Toast.makeText(view.getContext(),  error.toString() , Toast.LENGTH_LONG).show();
+                CustomAlertActivity customAlertActivity = new CustomAlertActivity.Builder()
+                        .setActivity(mAdminActivity)
+                        .setTitle("Thông báo")
+                        .setMessage("Không lấy được dữ liệu")
+                        .setType("error")
+                        .Build();
+                customAlertActivity.showDialog();
             }
-
+            loadingDialog.dismissDialog();
         } catch (IOException | JSONException e) {
+            CustomAlertActivity customAlertActivity = new CustomAlertActivity.Builder()
+                    .setActivity(mAdminActivity)
+                    .setTitle("Thông báo")
+                    .setMessage("Đã xảy ra lỗi!!!")
+                    .setType("error")
+                    .Build();
+            customAlertActivity.showDialog();
             e.printStackTrace();
+            loadingDialog.dismissDialog();
         }
     }
 

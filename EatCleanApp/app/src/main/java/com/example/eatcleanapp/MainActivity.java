@@ -147,6 +147,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 Intent intent = new Intent(MainActivity.this, SubActivity.class);
                 intent.putExtra("fragment-back", 3);
                 startActivity(intent);
+                finish();
                 overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_left);
             }
         });

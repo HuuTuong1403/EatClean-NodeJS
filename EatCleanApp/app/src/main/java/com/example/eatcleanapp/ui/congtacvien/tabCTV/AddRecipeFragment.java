@@ -16,6 +16,7 @@ import android.os.Bundle;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import android.os.Handler;
 import android.os.StrictMode;
 import android.provider.MediaStore;
 import android.provider.Settings;
@@ -27,6 +28,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -34,11 +37,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.eatcleanapp.API.APIService;
+import com.example.eatcleanapp.CustomAlert.CustomAlertActivity;
 import com.example.eatcleanapp.MainActivity;
 import com.example.eatcleanapp.R;
 import com.example.eatcleanapp.RealPathUtil;
 import com.example.eatcleanapp.model.recipes;
 import com.example.eatcleanapp.model.users;
+import com.example.eatcleanapp.ui.home.LoadingDialog;
 import com.example.eatcleanapp.ui.nguoidung.data_local.DataLocalManager;
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.MultiplePermissionsReport;
@@ -75,7 +80,7 @@ public class AddRecipeFragment extends Fragment {
     private Button btn_addRecipe_sendApproval;
     private MainActivity mMainActivity;
     private Uri mUri;
-    private String IDRecipe;
+    private LoadingDialog loadingDialog;
     private List<recipes> listRecipes;
     private users user;
     private static final MediaType MEDIA_TYPE_PNG = MediaType.parse("image/*");
@@ -84,6 +89,7 @@ public class AddRecipeFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         mMainActivity = (MainActivity) getActivity();
+        loadingDialog = new LoadingDialog(mMainActivity);
         view = inflater.inflate(R.layout.fragment_add_recipe, container, false);
         Mapping();
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
@@ -101,10 +107,20 @@ public class AddRecipeFragment extends Fragment {
             }
         });
 
+        Animation animScale = AnimationUtils.loadAnimation(view.getContext(), R.anim.anim_scale);
+        Handler handler = new Handler();
+
         btn_addRecipe_sendApproval.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sendApproval();
+                loadingDialog.startLoadingDialog();
+                v.startAnimation(animScale);
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        sendApproval();
+                    }
+                }, 400);
             }
         });
 
@@ -142,11 +158,25 @@ public class AddRecipeFragment extends Fragment {
                 edt_addRecipe_recipeIngredients.getText().toString().isEmpty() ||
                 edt_addRecipe_recipeSteps.getText().toString().isEmpty() ||
                 edt_addRecipe_recipeTime.getText().toString().isEmpty()) {
-            Toast.makeText(mMainActivity, "Các trường nhập liệu không được trống", Toast.LENGTH_LONG).show();
+            CustomAlertActivity customAlertActivity = new CustomAlertActivity.Builder()
+                    .setActivity(mMainActivity)
+                    .setTitle("Thông báo")
+                    .setMessage("Các trường nhập liệu không được trống")
+                    .setType("error")
+                    .Build();
+            customAlertActivity.showDialog();
+            loadingDialog.dismissDialog();
         }
         else{
             if(mUri == null){
-                Toast.makeText(mMainActivity, "Vui lòng tải hỉnh ảnh món ăn", Toast.LENGTH_SHORT).show();
+                CustomAlertActivity customAlertActivity = new CustomAlertActivity.Builder()
+                        .setActivity(mMainActivity)
+                        .setTitle("Thông báo")
+                        .setMessage("Vui lòng tải hỉnh ảnh món ăn")
+                        .setType("error")
+                        .Build();
+                customAlertActivity.showDialog();
+                loadingDialog.dismissDialog();
             }
             else{
                 String recipeTitle          = edt_addRecipe_recipeTitle.getText().toString();
@@ -187,24 +217,45 @@ public class AddRecipeFragment extends Fragment {
         try {
             Response response = client.newCall(request).execute();
             if (response.isSuccessful()){
-                Toast.makeText(view.getContext(),  "Đăng ký thành công", Toast.LENGTH_LONG).show();
+                CustomAlertActivity customAlertActivity = new CustomAlertActivity.Builder()
+                        .setActivity(mMainActivity)
+                        .setTitle("Thông báo")
+                        .setMessage("Thêm công thức thành công! Vui lòng chờ quản trị viên phê duyệt")
+                        .setType("success")
+                        .Build();
+                customAlertActivity.showDialog();
+                edt_addRecipe_recipeTitle.setText("");
+                edt_addRecipe_recipeContent.setText("");
+                edt_addRecipe_recipeNutritional.setText("");
+                edt_addRecipe_recipeIngredients.setText("");
+                edt_addRecipe_recipeSteps.setText("");
+                edt_addRecipe_recipeTime.setText("");
+                imgV_addRecipe_uploadImage.setImageResource(R.drawable.up);
             }
             else {
                 String jsonData = response.body().string();
                 JSONObject jsonObject = new JSONObject(jsonData);
                 JSONObject error = jsonObject.getJSONObject("error");
-                Toast.makeText(view.getContext(),  error.toString() , Toast.LENGTH_LONG).show();
+                CustomAlertActivity customAlertActivity = new CustomAlertActivity.Builder()
+                        .setActivity(mMainActivity)
+                        .setTitle("Thông báo")
+                        .setMessage("Thêm công thức thất bại")
+                        .setType("error")
+                        .Build();
+                customAlertActivity.showDialog();
             }
+            loadingDialog.dismissDialog();
         } catch (IOException | JSONException e) {
+            CustomAlertActivity customAlertActivity = new CustomAlertActivity.Builder()
+                    .setActivity(mMainActivity)
+                    .setTitle("Thông báo")
+                    .setMessage("Đã xảy ra lỗi!!!")
+                    .setType("error")
+                    .Build();
+            customAlertActivity.showDialog();
             e.printStackTrace();
+            loadingDialog.dismissDialog();
         }
-        edt_addRecipe_recipeTitle.setText("");
-        edt_addRecipe_recipeContent.setText("");
-        edt_addRecipe_recipeNutritional.setText("");
-        edt_addRecipe_recipeIngredients.setText("");
-        edt_addRecipe_recipeSteps.setText("");
-        edt_addRecipe_recipeTime.setText("");
-        imgV_addRecipe_uploadImage.setImageResource(R.drawable.up);
     }
 
     
@@ -222,19 +273,26 @@ public class AddRecipeFragment extends Fragment {
         user                            = DataLocalManager.getUser();
     }
 
-    private void openRequest(){
+    private Dialog createDialog(int layout){
         Dialog dialog = new Dialog(view.getContext());
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setContentView(R.layout.layout_dialog_request);
+        dialog.setContentView(layout);
         Window window = dialog.getWindow();
         if(window == null){
-            return;
+            return null;
         }
         window.setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT);
         window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         WindowManager.LayoutParams windowAtributes = window.getAttributes();
         windowAtributes.gravity = Gravity.CENTER;
         window.setAttributes(windowAtributes);
+        return dialog;
+    }
+
+    private void openRequest(){
+        Dialog dialog = createDialog(R.layout.layout_dialog_request);
+        if(dialog == null)
+            return;
         Button btnAccept = (Button)dialog.findViewById(R.id.btn_accept_request);
         btnAccept.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -263,7 +321,7 @@ public class AddRecipeFragment extends Fragment {
                         .withErrorListener(new PermissionRequestErrorListener() {
                             @Override
                             public void onError(DexterError dexterError) {
-                                Toast.makeText(mMainActivity, "Có lỗi xảy ra!", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(mMainActivity, "Có lỗi xảy ra!", Toast.LENGTH_LONG).show();
                             }
                         }).onSameThread().check();
             }
@@ -273,18 +331,9 @@ public class AddRecipeFragment extends Fragment {
     }
 
     private void openDialogChooseImage(){
-        Dialog dialog = new Dialog(view.getContext());
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setContentView(R.layout.layout_choose_image);
-        Window window = dialog.getWindow();
-        if(window == null){
+        Dialog dialog = createDialog(R.layout.layout_choose_image);
+        if(dialog == null)
             return;
-        }
-        window.setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT);
-        window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        WindowManager.LayoutParams windowAttributes = window.getAttributes();
-        windowAttributes.gravity = Gravity.CENTER;
-        window.setAttributes(windowAttributes);
 
         Button btn_chooseImage_Camera = (Button)dialog.findViewById(R.id.btn_chooseImage_Camera);
         Button btn_chooseImage_Media = (Button)dialog.findViewById(R.id.btn_chooseImage_Media);
@@ -295,12 +344,6 @@ public class AddRecipeFragment extends Fragment {
             public void onClick(View v) {
                 dialog.dismiss();
                 Intent takePhoto = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                /*File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
-                        Environment.DIRECTORY_PICTURES), "AvatarFolder");
-                mediaStorageDir.mkdirs();
-                mUri = Uri.fromFile(new File(mediaStorageDir.getPath() + File.separator +
-                        "avatar.jpg"));
-                takePhoto.putExtra(MediaStore.EXTRA_OUTPUT, mUri);*/
                 startActivityForResult(takePhoto, 0);
             }
         });
@@ -345,9 +388,6 @@ public class AddRecipeFragment extends Fragment {
                 if(resultCode == mMainActivity.RESULT_OK){
                     Uri pickImage = data.getData();
                     mUri = pickImage;
-                    String paths = pickImage.getPath();
-                    File imageFile = new File(paths);
-                    Log.e("AAA", "" + imageFile);
                     imgV_addRecipe_uploadImage.setImageURI(pickImage);
                     break;
                 }

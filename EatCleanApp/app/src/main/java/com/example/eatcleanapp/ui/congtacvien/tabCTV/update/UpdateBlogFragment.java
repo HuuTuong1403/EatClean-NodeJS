@@ -2,6 +2,7 @@ package com.example.eatcleanapp.ui.congtacvien.tabCTV.update;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
@@ -16,6 +17,7 @@ import android.os.Bundle;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import android.os.Handler;
 import android.os.StrictMode;
 import android.provider.MediaStore;
 import android.provider.Settings;
@@ -27,6 +29,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -34,10 +38,14 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.example.eatcleanapp.API.APIService;
+import com.example.eatcleanapp.CustomAlert.CustomAlertActivity;
+import com.example.eatcleanapp.MainActivity;
 import com.example.eatcleanapp.R;
 import com.example.eatcleanapp.RealPathUtil;
 import com.example.eatcleanapp.model.blogs;
 import com.example.eatcleanapp.model.users;
+import com.example.eatcleanapp.ui.congtacvien.tabCTV.ListAddBlogFragment;
+import com.example.eatcleanapp.ui.home.LoadingDialog;
 import com.example.eatcleanapp.ui.home.detail.DetailActivity;
 import com.example.eatcleanapp.ui.nguoidung.data_local.DataLocalManager;
 import com.karumi.dexter.Dexter;
@@ -72,17 +80,23 @@ public class UpdateBlogFragment extends Fragment {
     private Button btn_updateBlog_sendApproval;
     private blogs blog;
     private Uri mUri;
+    private LoadingDialog loadingDialog;
     private static final MediaType MEDIA_TYPE_PNG = MediaType.parse("image/*");
+
     @SuppressLint("ClickableViewAccessibility")
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         detailActivity = (DetailActivity) getActivity();
+        loadingDialog = new LoadingDialog(detailActivity);
         view = inflater.inflate(R.layout.fragment_update_blog, container, false);
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy((policy));
         Mapping();
         setData();
+
+        Animation animScale = AnimationUtils.loadAnimation(view.getContext(), R.anim.anim_scale);
+        Handler handler = new Handler();
 
         imgV_updateBlog_uploadImage.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -100,7 +114,14 @@ public class UpdateBlogFragment extends Fragment {
         btn_updateBlog_sendApproval.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sendUpdate();
+                loadingDialog.startLoadingDialog();
+                v.startAnimation(animScale);
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        sendUpdate();
+                    }
+                }, 400);
             }
         });
 
@@ -129,13 +150,19 @@ public class UpdateBlogFragment extends Fragment {
 
     private void sendUpdate() {
         if(edt_updateBlog_blogTitle.getText().toString().isEmpty() || edt_updateBlog_blogContent.getText().toString().isEmpty()){
-            Toast.makeText(detailActivity, "Các trường nhập liệu không được trống", Toast.LENGTH_LONG).show();
+            CustomAlertActivity customAlertActivity = new CustomAlertActivity.Builder()
+                    .setActivity(detailActivity)
+                    .setTitle("Thông báo")
+                    .setMessage("Các trường nhập liệu không được trống")
+                    .setType("error")
+                    .Build();
+            customAlertActivity.showDialog();
+            loadingDialog.dismissDialog();
         }
         else{
             String BlogTitle    = edt_updateBlog_blogTitle.getText().toString();
             String BlogAuthor   = blog.getBlogAuthor();
             String BlogContent  = edt_updateBlog_blogContent.getText().toString();
-
             updateBlogCtv(blog.get_id(), BlogTitle, BlogContent);
         }
     }
@@ -150,9 +177,9 @@ public class UpdateBlogFragment extends Fragment {
             File file = new File(pathImage);
             MediaType mediaType = MediaType.parse("text/plain");
              body = new MultipartBody.Builder().setType(MultipartBody.FORM)
-                    .addFormDataPart("BlogTitle",blogTitle)
-                    .addFormDataPart("BlogContent",blogContent)
-                    .addFormDataPart("IDBlog",idBlog)
+                    .addFormDataPart("BlogTitle", blogTitle)
+                    .addFormDataPart("BlogContent", blogContent)
+                    .addFormDataPart("IDBlog", idBlog)
                     .addFormDataPart("Image", file.getName(),
                             RequestBody.create(MEDIA_TYPE_PNG, file))
                     .build();
@@ -173,16 +200,37 @@ public class UpdateBlogFragment extends Fragment {
         try {
             Response response = client.newCall(request).execute();
             if (response.isSuccessful()){
-                Toast.makeText(view.getContext(),  "Chỉnh sửa thành công", Toast.LENGTH_LONG).show();
+                CustomAlertActivity customAlertActivity = new CustomAlertActivity.Builder()
+                        .setActivity(detailActivity)
+                        .setTitle("Thông báo")
+                        .setMessage("Chỉnh sửa blog thành công")
+                        .setType("success")
+                        .Build();
+                customAlertActivity.showDialog();
             }
             else {
                 String jsonData = response.body().string();
                 JSONObject jsonObject = new JSONObject(jsonData);
                 JSONObject error = jsonObject.getJSONObject("error");
-                Toast.makeText(view.getContext(),  error.toString() , Toast.LENGTH_LONG).show();
+                CustomAlertActivity customAlertActivity = new CustomAlertActivity.Builder()
+                        .setActivity(detailActivity)
+                        .setTitle("Thông báo")
+                        .setMessage("Chỉnh sửa blog thất bại")
+                        .setType("error")
+                        .Build();
+                customAlertActivity.showDialog();
             }
+            loadingDialog.dismissDialog();
         } catch (IOException | JSONException e) {
+            CustomAlertActivity customAlertActivity = new CustomAlertActivity.Builder()
+                    .setActivity(detailActivity)
+                    .setTitle("Thông báo")
+                    .setMessage("Đã xảy ra lỗi!!!")
+                    .setType("error")
+                    .Build();
+            customAlertActivity.showDialog();
             e.printStackTrace();
+            loadingDialog.dismissDialog();
         }
     }
 
@@ -202,19 +250,26 @@ public class UpdateBlogFragment extends Fragment {
         btn_updateBlog_sendApproval = (Button)view.findViewById(R.id.btn_updateBlog_sendApproval);
     }
 
-    private void openRequest(){
+    private Dialog createDialog(int layout){
         Dialog dialog = new Dialog(view.getContext());
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setContentView(R.layout.layout_dialog_request);
+        dialog.setContentView(layout);
         Window window = dialog.getWindow();
         if(window == null){
-            return;
+            return null;
         }
         window.setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT);
         window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         WindowManager.LayoutParams windowAtributes = window.getAttributes();
         windowAtributes.gravity = Gravity.CENTER;
         window.setAttributes(windowAtributes);
+        return dialog;
+    }
+
+    private void openRequest(){
+        Dialog dialog = createDialog(R.layout.layout_dialog_request);
+        if(dialog == null)
+            return;
         Button btnAccept = (Button)dialog.findViewById(R.id.btn_accept_request);
         btnAccept.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -243,7 +298,7 @@ public class UpdateBlogFragment extends Fragment {
                         .withErrorListener(new PermissionRequestErrorListener() {
                             @Override
                             public void onError(DexterError dexterError) {
-                                Toast.makeText(detailActivity, "Có lỗi xảy ra!", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(detailActivity, "Có lỗi xảy ra!", Toast.LENGTH_LONG).show();
                             }
                         }).onSameThread().check();
             }
@@ -253,18 +308,9 @@ public class UpdateBlogFragment extends Fragment {
     }
 
     private void openDialogChooseImage(){
-        Dialog dialog = new Dialog(view.getContext());
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setContentView(R.layout.layout_choose_image);
-        Window window = dialog.getWindow();
-        if(window == null){
+        Dialog dialog = createDialog(R.layout.layout_choose_image);
+        if(dialog == null)
             return;
-        }
-        window.setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT);
-        window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        WindowManager.LayoutParams windowAttributes = window.getAttributes();
-        windowAttributes.gravity = Gravity.CENTER;
-        window.setAttributes(windowAttributes);
 
         Button btn_chooseImage_Camera = (Button)dialog.findViewById(R.id.btn_chooseImage_Camera);
         Button btn_chooseImage_Media = (Button)dialog.findViewById(R.id.btn_chooseImage_Media);
@@ -319,9 +365,6 @@ public class UpdateBlogFragment extends Fragment {
                 if(resultCode == detailActivity.RESULT_OK){
                     Uri pickImage = data.getData();
                     mUri = pickImage;
-                    String paths = pickImage.getPath();
-                    File imageFile = new File(paths);
-                    Log.e("AAA", "" + imageFile);
                     imgV_updateBlog_uploadImage.setImageURI(pickImage);
                     break;
                 }
@@ -334,6 +377,4 @@ public class UpdateBlogFragment extends Fragment {
         String path = MediaStore.Images.Media.insertImage(inContext.getContentResolver(), inImage, String.valueOf(System.currentTimeMillis()), null);
         return Uri.parse(path);
     }
-
-
 }
