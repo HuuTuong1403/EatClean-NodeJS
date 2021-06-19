@@ -100,6 +100,7 @@ public class ApprovalRecipeAdapter extends RecyclerView.Adapter<ApprovalRecipeAd
     }
 
     private void approvalRecipe(String IDRecipes, int position){
+        String token = user.getToken();
         OkHttpClient client = new OkHttpClient().newBuilder()
                 .build();
         MediaType mediaType = MediaType.parse("text/plain");

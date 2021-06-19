@@ -15,9 +15,8 @@ public class recipes implements Serializable {
     private String Time;
     private String ImageMain;
 
-
-    public recipes(String _id, String recipesTitle, String recipesAuthor, String recipesContent, String nutritionalIngredients,
-                   String ingredients, String steps, String IDAuthor, String status, String imageMain) {
+    public recipes(String _id, String recipesTitle, String recipesAuthor, String recipesContent, String nutritionalIngredients, String ingredients,
+                   String steps, String IDAuthor, String status, String time, String imageMain) {
         this._id = _id;
         RecipesTitle = recipesTitle;
         RecipesAuthor = recipesAuthor;
@@ -27,6 +26,7 @@ public class recipes implements Serializable {
         Steps = steps;
         this.IDAuthor = IDAuthor;
         Status = status;
+        Time = time;
         ImageMain = imageMain;
     }
 
@@ -84,6 +84,14 @@ public class recipes implements Serializable {
 
     public void setSteps(String steps) {
         Steps = steps;
+    }
+
+    public String getTime() {
+        return Time;
+    }
+
+    public void setTime(String time) {
+        Time = time;
     }
 
     public String getIDAuthor() {

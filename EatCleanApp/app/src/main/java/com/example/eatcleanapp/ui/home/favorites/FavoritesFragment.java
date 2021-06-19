@@ -128,7 +128,8 @@ public class FavoritesFragment extends Fragment implements IClickListener {
                             object.getString("Steps"),
                             object.getString("IDAuthor"),
                             object.getString("Status"),
-                            object.getString("ImageMain")
+                            object.getString("ImageMain"),
+                            object.getString("Time")
                     );
                     listFavoritesRecipes.add(recipe);
                 }

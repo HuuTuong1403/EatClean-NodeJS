@@ -89,7 +89,8 @@ public class RecipesApprovalAdminFragment extends Fragment implements IClickList
                             object.getString("Steps"),
                             object.getString("IDAuthor"),
                             object.getString("Status"),
-                            object.getString("ImageMain")
+                            object.getString("ImageMain"),
+                            object.getString("Time")
                     );
                     listRecipes.add(recipe);
                 }
