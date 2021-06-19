@@ -161,8 +161,9 @@ public class RecipesFragment extends Fragment implements IClickListener {
                                 object.getString("Steps"),
                                 object.getString("IDAuthor"),
                                 object.getString("Status"),
-                                object.getString("ImageMain"),
-                                object.getString("Time")
+                                object.getString("Time"),
+                                object.getString("ImageMain")
+
                         );
                     listRecipes.add(recipe);
                     oldList.add(recipe);
