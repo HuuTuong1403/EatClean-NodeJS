@@ -106,7 +106,7 @@ public class FragmentForgotPassword extends Fragment {
                     .build();
             Request request = new Request.Builder()
                     .url("https://eat-clean-nhom04.herokuapp.com/me/send-password-sms?Username=" + forgot_pass_edtUsername.getText().toString().trim()
-                                        +" &SoDienThoai=" + forgot_pass_edtPhone.getText().toString().trim())
+                                        + "&SoDienThoai=" + forgot_pass_edtPhone.getText().toString().trim())
                     .method("GET", null)
                     .addHeader("Content-Type", "application/json")
                     .build();
