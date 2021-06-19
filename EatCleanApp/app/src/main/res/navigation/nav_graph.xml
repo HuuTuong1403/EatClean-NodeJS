@@ -17,27 +17,6 @@
         android:name="com.example.eatcleanapp.ui.home.forgotpass.FragmentForgotPassword"
         android:label="Quên mật khẩu"
         tools:layout="@layout/fragment_forgot_password">
-        <action
-            android:id="@+id/action_forgot_pass_fragment_to_forgotChange_pass_fragment"
-            app:destination="@+id/forgotChange_pass_fragment"
-            app:enterAnim="@anim/slide_in_left"
-            app:exitAnim="@anim/slide_out_left"
-            app:popEnterAnim="@anim/slide_in_right"
-            app:popExitAnim="@anim/slide_out_right" />
-    </fragment>
-
-    <fragment
-        android:id="@+id/forgotChange_pass_fragment"
-        android:name="com.example.eatcleanapp.ui.home.forgotpass.FragmentForgotChangePass"
-        android:label="Đổi mật khẩu"
-        tools:layout="@layout/fragment_forgot_change_pass">
-        <action
-            android:id="@+id/action_forgotChange_pass_fragment_to_forgot_pass_fragment"
-            app:destination="@+id/forgot_pass_fragment"
-            app:enterAnim="@anim/slide_in_left"
-            app:exitAnim="@anim/slide_out_left"
-            app:popEnterAnim="@anim/slide_in_right"
-            app:popExitAnim="@anim/slide_out_right" />
     </fragment>
 
 
