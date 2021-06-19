@@ -11,6 +11,7 @@ import androidx.navigation.fragment.NavHostFragment;
 import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.Message;
+import android.os.StrictMode;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,6 +26,14 @@ import com.example.eatcleanapp.SubActivity;
 import com.example.eatcleanapp.ui.home.profile.ProfileFragment;
 
 import org.jetbrains.annotations.NotNull;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
+
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 public class FragmentForgotPassword extends Fragment {
 
@@ -40,6 +49,8 @@ public class FragmentForgotPassword extends Fragment {
         mSubActivity.getSupportActionBar().setHomeAsUpIndicator(R.drawable.back24);
         view = inflater.inflate(R.layout.fragment_forgot_password, container, false);
         Mapping();
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy((policy));
         Animation animButton = mSubActivity.getAnimButton(view);
         Handler handler = new Handler();
 
@@ -80,6 +91,7 @@ public class FragmentForgotPassword extends Fragment {
     }
 
     private void SendCodeToPhoneNumber() {
+        String test = forgot_pass_edtUsername.getText().toString();
         if(forgot_pass_edtUsername.getText().toString().isEmpty() || forgot_pass_edtPhone.getText().toString().isEmpty()){
             CustomAlertActivity customAlertActivity = new CustomAlertActivity.Builder()
                     .setActivity(mSubActivity)
@@ -90,19 +102,41 @@ public class FragmentForgotPassword extends Fragment {
             customAlertActivity.showDialog();
         }
         else{
-            CountDownTimer countDownTimer = new CountDownTimer(30000, 1000) {
-                @Override
-                public void onTick(long millisUntilFinished) {
-                    forgot_pass_btnSendCode.setEnabled(false);
-                    forgot_pass_btnSendCode.setText("0:" + millisUntilFinished/1000);
+            OkHttpClient client = new OkHttpClient().newBuilder()
+                    .build();
+            Request request = new Request.Builder()
+                    .url("https://eat-clean-nhom04.herokuapp.com/me/send-password-sms?Username=" + forgot_pass_edtUsername.getText().toString().trim()
+                                        +" &SoDienThoai=" + forgot_pass_edtPhone.getText().toString().trim())
+                    .method("GET", null)
+                    .addHeader("Content-Type", "application/json")
+                    .build();
+            try {
+                Response response = client.newCall(request).execute();
+                if (response.isSuccessful()){
+                    CustomAlertActivity customAlertActivity = new CustomAlertActivity.Builder()
+                            .setActivity(mSubActivity)
+                            .setTitle("Thông báo")
+                            .setMessage("Đã gửi mã code thành công, vui lòng kiểm tra tin nhắn")
+                            .setType("success")
+                            .Build();
+                    customAlertActivity.showDialog();
                 }
+                else {
+                    String jsonData = response.body().string();
+                    JSONObject jsonObject = new JSONObject(jsonData);
+                    JSONObject error = jsonObject.getJSONObject("error");
+                    CustomAlertActivity customAlertActivity = new CustomAlertActivity.Builder()
+                            .setActivity(mSubActivity)
+                            .setTitle("Thông báo")
+                            .setMessage("Đã gửi mã code thất bại")
+                            .setType("error")
+                            .Build();
+                    customAlertActivity.showDialog();
+                }
+            } catch (IOException | JSONException e) {
+                e.printStackTrace();
+            }
 
-                @Override
-                public void onFinish() {
-                    forgot_pass_btnSendCode.setText("Gửi lại mã xác nhận");
-                    forgot_pass_btnSendCode.setEnabled(true);
-                }
-            }.start();
         }
     }
 
