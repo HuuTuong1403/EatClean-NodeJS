@@ -114,7 +114,19 @@ public class SignInFragment extends Fragment {
                 handler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        SignIn();
+                        if(edtEmail.getText().toString().isEmpty() || edtPassword.getText().toString().isEmpty()){
+                            CustomAlertActivity customAlertActivity = new CustomAlertActivity.Builder()
+                                    .setActivity(getActivity())
+                                    .setTitle("Thông báo")
+                                    .setMessage("Thông tin đăng nhập không được trống")
+                                    .setType("error")
+                                    .Build();
+                            customAlertActivity.showDialog();
+                            loadingDialog.dismissDialog();
+                        }
+                        else{
+                            SignIn();
+                        }
                     }
                 }, 400);
             }
@@ -299,6 +311,7 @@ public class SignInFragment extends Fragment {
                     customAlertActivity.showDialog();
                 }
             }
+            loadingDialog.dismissDialog();
         } catch (IOException | JSONException e) {
             CustomAlertActivity customAlertActivity = new CustomAlertActivity.Builder()
                     .setActivity(getActivity())
