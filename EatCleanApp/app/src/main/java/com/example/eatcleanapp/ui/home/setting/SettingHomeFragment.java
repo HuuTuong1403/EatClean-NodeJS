@@ -23,6 +23,7 @@ import com.example.eatcleanapp.MainActivity;
 import com.example.eatcleanapp.R;
 import com.example.eatcleanapp.model.users;
 import com.example.eatcleanapp.ui.home.HomeFragment;
+import com.example.eatcleanapp.ui.home.LoadingDialog;
 import com.example.eatcleanapp.ui.home.signin.SignInFragment;
 import com.example.eatcleanapp.ui.nguoidung.data_local.DataLocalManager;
 import com.google.android.material.navigation.NavigationView;
@@ -48,7 +49,13 @@ public class SettingHomeFragment extends Fragment {
         Handler handler = new Handler();
 
         if(user != null){
-            String s = "Bạn đang đăng nhập với tài khoản <b>" + user.getUsername() + "</b>" ;
+            String s = "";
+            if (user.getIDRole().equals("609d2d03fee09d75f011158c")) {
+                s = "Bạn đang đăng nhập với tài khoản <b>" + user.getUsername() + "</b> là cộng tác viên" ;
+            }
+            else{
+                s = "Bạn đang đăng nhập với tài khoản <b>" + user.getUsername() + "</b> là người dùng" ;
+            }
             setting_home_txv_show_isLogIn.setText(Html.fromHtml(s, Html.FROM_HTML_MODE_LEGACY));
             setting_home_btn_isLogIn.setText("Đăng xuất");
             setting_home_btn_isLogIn.setOnClickListener(new View.OnClickListener() {

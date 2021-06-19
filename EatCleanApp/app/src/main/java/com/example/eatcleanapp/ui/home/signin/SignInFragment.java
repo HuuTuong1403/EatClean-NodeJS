@@ -16,11 +16,13 @@ import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
 
+import com.example.eatcleanapp.CustomAlert.CustomAlertActivity;
 import com.example.eatcleanapp.MainActivity;
 import com.example.eatcleanapp.R;
 import com.example.eatcleanapp.SubActivity;
 import com.example.eatcleanapp.model.users;
 import com.example.eatcleanapp.ui.home.HomeFragment;
+import com.example.eatcleanapp.ui.home.LoadingDialog;
 import com.example.eatcleanapp.ui.nguoidung.data_local.DataLocalManager;
 import com.example.eatcleanapp.ui.quantrivien.AdminActivity;
 import com.facebook.AccessToken;
@@ -63,12 +65,14 @@ public class SignInFragment extends Fragment {
     private ImageButton searchBox;
     private MainActivity mMainActivity;
     private users userLogin;
-    private boolean checkLogin = false;
+    private LoadingDialog loadingDialog;
+
     @Override
     public View onCreateView(@NotNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         FacebookSdk.getApplicationContext();
         mMainActivity = (MainActivity) getActivity();
+        loadingDialog = new LoadingDialog(mMainActivity);
         callbackManager = CallbackManager.Factory.create();
         view = inflater.inflate(R.layout.sign_in_fragment, container, false);
         loginButton();
@@ -105,56 +109,12 @@ public class SignInFragment extends Fragment {
         btnSignIn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                loadingDialog.startLoadingDialog();
                 v.startAnimation(anim);
                 handler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
                         SignIn();
-                        if (checkLogin){
-                            switch(userLogin.getIDRole()){
-                                case "609d2d54fee09d75f011158d":{
-                                    DataLocalManager.setUser(userLogin);
-                                    Intent intent = new Intent(view.getContext(), AdminActivity.class);
-                                    Bundle bundle = new Bundle();
-                                    bundle.putSerializable("object_user", userLogin);
-                                    intent.putExtras(bundle);
-                                    startActivity(intent);
-                                    mMainActivity.overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_right);
-                                    getActivity().finish();
-                                    break;
-                                }
-                                case "609d2d03fee09d75f011158c":{
-                                    DataLocalManager.setUser(userLogin);
-                                    Bundle bundle = new Bundle();
-                                    HomeFragment homeFragment = new HomeFragment();
-                                    searchBox.setVisibility(View.VISIBLE);
-                                    bundle.putSerializable("object_user", userLogin);
-                                    homeFragment.setArguments(bundle);
-                                    mMainActivity.replaceFragment(homeFragment, "Trang chủ");
-                                    mMainActivity.setCurrentFragment(1);
-                                    NavigationView naview = mMainActivity.findViewById(R.id.nav_view);
-                                    naview.getMenu().findItem(R.id.nav_home).setChecked(true);
-                                    naview.getMenu().findItem(R.id.nav_ctv).setVisible(true);
-                                    break;
-                                }
-                                case "609d2ceafee09d75f011158b":{
-                                    DataLocalManager.setUser(userLogin);
-                                    HomeFragment homeFragment = new HomeFragment();
-                                    Bundle bundle = new Bundle();
-                                    searchBox.setVisibility(View.VISIBLE);
-                                    bundle.putSerializable("object_user", userLogin);
-                                    homeFragment.setArguments(bundle);
-                                    mMainActivity.replaceFragment(homeFragment, "Trang chủ");
-                                    mMainActivity.setCurrentFragment(1);
-                                    NavigationView naview = mMainActivity.findViewById(R.id.nav_view);
-                                    naview.getMenu().findItem(R.id.nav_home).setChecked(true);
-                                    break;
-                                }
-                            }
-                        }
-                        else{
-                            Toast.makeText(view.getContext(), "Thông tin đăng nhập không đúng", Toast.LENGTH_SHORT).show();
-                        }
                     }
                 }, 400);
             }
@@ -270,15 +230,85 @@ public class SignInFragment extends Fragment {
                 JSONObject data = Jobject.getJSONObject("data");
                 Gson g = new Gson();
                 userLogin = g.fromJson(String.valueOf(data), users.class);
-                checkLogin = true;
+                CustomAlertActivity customAlertActivity = new CustomAlertActivity.Builder()
+                        .setActivity(getActivity())
+                        .setTitle("Thông báo")
+                        .setMessage("Đăng nhập thành công")
+                        .setType("success")
+                        .Build();
+                customAlertActivity.showDialog();
+                switch(userLogin.getIDRole()){
+                    case "609d2d54fee09d75f011158d":{
+                        DataLocalManager.setUser(userLogin);
+                        Intent intent = new Intent(view.getContext(), AdminActivity.class);
+                        Bundle bundle = new Bundle();
+                        bundle.putSerializable("object_user", userLogin);
+                        intent.putExtras(bundle);
+                        startActivity(intent);
+                        mMainActivity.overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_right);
+                        getActivity().finish();
+                        break;
+                    }
+                    case "609d2d03fee09d75f011158c":{
+                        DataLocalManager.setUser(userLogin);
+                        Bundle bundle = new Bundle();
+                        HomeFragment homeFragment = new HomeFragment();
+                        searchBox.setVisibility(View.VISIBLE);
+                        bundle.putSerializable("object_user", userLogin);
+                        homeFragment.setArguments(bundle);
+                        mMainActivity.replaceFragment(homeFragment, "Trang chủ");
+                        mMainActivity.setCurrentFragment(1);
+                        NavigationView naview = mMainActivity.findViewById(R.id.nav_view);
+                        naview.getMenu().findItem(R.id.nav_home).setChecked(true);
+                        naview.getMenu().findItem(R.id.nav_ctv).setVisible(true);
+                        break;
+                    }
+                    case "609d2ceafee09d75f011158b":{
+                        DataLocalManager.setUser(userLogin);
+                        HomeFragment homeFragment = new HomeFragment();
+                        Bundle bundle = new Bundle();
+                        searchBox.setVisibility(View.VISIBLE);
+                        bundle.putSerializable("object_user", userLogin);
+                        homeFragment.setArguments(bundle);
+                        mMainActivity.replaceFragment(homeFragment, "Trang chủ");
+                        mMainActivity.setCurrentFragment(1);
+                        NavigationView naview = mMainActivity.findViewById(R.id.nav_view);
+                        naview.getMenu().findItem(R.id.nav_home).setChecked(true);
+                        break;
+                    }
+                }
             }
             else {
-                JSONObject error = Jobject.getJSONObject("error");
-                Toast.makeText(view.getContext(),  error.toString() , Toast.LENGTH_LONG).show();
+                String error = Jobject.getString("error");
+                if(error.trim().equals("Email not found or Email Inactive")){
+                    CustomAlertActivity customAlertActivity = new CustomAlertActivity.Builder()
+                            .setActivity(getActivity())
+                            .setTitle("Thông báo")
+                            .setMessage("Email/Tài khoản không tìm thấy hoặc Email chưa được kích hoạt! Vui lòng kiểm tra lại")
+                            .setType("error")
+                            .Build();
+                    customAlertActivity.showDialog();
+                }
+                else{
+                    CustomAlertActivity customAlertActivity = new CustomAlertActivity.Builder()
+                            .setActivity(getActivity())
+                            .setTitle("Thông báo")
+                            .setMessage("Thông tin đăng nhập không đúng")
+                            .setType("error")
+                            .Build();
+                    customAlertActivity.showDialog();
+                }
             }
         } catch (IOException | JSONException e) {
-            Toast.makeText(view.getContext(),  e.toString() , Toast.LENGTH_LONG).show();
+            CustomAlertActivity customAlertActivity = new CustomAlertActivity.Builder()
+                    .setActivity(getActivity())
+                    .setTitle("Thông báo")
+                    .setMessage("Đã có lỗi xảy ra")
+                    .setType("error")
+                    .Build();
+            customAlertActivity.showDialog();
         }
+        loadingDialog.dismissDialog();
     }
 
 }

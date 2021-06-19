@@ -45,6 +45,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="Tên đăng nhập"
+                    android:inputType="text"
                     android:fontFamily="@font/robotomonoregular"
                     android:textColorHint="@color/black"
                     android:textColor="@color/black"
@@ -62,6 +63,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="Email"
+                    android:inputType="textEmailAddress"
                     android:fontFamily="@font/robotomonoregular"
                     android:textColorHint="@color/black"
                     android:textColor="@color/black"
@@ -117,6 +119,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="Họ và tên"
+                    android:inputType="text"
                     android:id="@+id/signup_edtFullname"
                     android:fontFamily="@font/robotomonoregular"
                     android:textColorHint="@color/black"
@@ -127,18 +130,27 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="10dp"
-                app:startIconDrawable="@drawable/ic_person24"
+                app:startIconDrawable="@drawable/baseline_phone_24"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
                 <com.google.android.material.textfield.TextInputEditText
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="Số điện thoại"
                     android:id="@+id/signup_edtSDT"
+                    android:inputType="number"
                     android:fontFamily="@font/robotomonoregular"
                     android:textColorHint="@color/black"
                     android:textColor="@color/black"
                     android:textSize="16sp" />
             </com.google.android.material.textfield.TextInputLayout>
+            <CheckBox
+                android:id="@+id/cb_chooseCtv"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                android:layoutDirection="rtl"
+                android:text="Để trở thành cộng tác viên! Hãy chọn vào ô này."
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
             <Button
                 android:layout_marginBottom="20dp"
                 android:layout_width="match_parent"

@@ -62,7 +62,7 @@ public class SettingAdminFragment extends Fragment {
             return;
         }
         else{
-            String s = "Bạn đang đăng nhập với tài khoản <b>" + user.getUsername() + "</b>" + " là quảm trị viên";
+            String s = "Bạn đang đăng nhập với tài khoản <b>" + user.getUsername() + "</b>" + " là quản trị viên";
             setting_admin_txv_show_isLogIn.setText(Html.fromHtml(s, Html.FROM_HTML_MODE_LEGACY));
         }
     }

@@ -47,8 +47,6 @@ public class DetailRecipesFragment extends Fragment{
         view = inflater.inflate(R.layout.fragment_detail_recipes, container, false);
         mDetailActivity = (DetailActivity) getActivity();
         Mapping();
-
-
         return view;
     }
     private void Mapping(){

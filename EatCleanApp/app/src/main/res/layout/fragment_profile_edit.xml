@@ -13,7 +13,7 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
         <de.hdodenhof.circleimageview.CircleImageView
-            android:id="@+id/imageView_avatar_user"
+            android:id="@+id/imageView_avatar_user_edit"
             android:layout_marginTop="20dp"
             android:layout_width="150dp"
             android:layout_gravity="center"
@@ -148,7 +148,7 @@
                 android:layout_marginStart="20dp"
                 android:layout_marginEnd="10dp"
                 android:layout_toEndOf="@+id/profileEdit_txv_show_sdt"
-                app:startIconDrawable="@drawable/ic_person24">
+                app:startIconDrawable="@drawable/baseline_phone_24">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/profileEdit_edt_sdt"

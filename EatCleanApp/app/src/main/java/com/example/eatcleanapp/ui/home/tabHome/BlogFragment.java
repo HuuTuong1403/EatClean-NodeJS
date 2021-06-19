@@ -16,6 +16,7 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.example.eatcleanapp.API.APIService;
+import com.example.eatcleanapp.CustomAlert.CustomAlertActivity;
 import com.example.eatcleanapp.IClickListener;
 import com.example.eatcleanapp.MainActivity;
 import com.example.eatcleanapp.R;
@@ -112,9 +113,22 @@ public class BlogFragment extends Fragment implements IClickListener {
             }
             else {
                 JSONObject error = Jobject.getJSONObject("error");
-                Toast.makeText(view.getContext(),  error.toString() , Toast.LENGTH_LONG).show();
+                CustomAlertActivity customAlertActivity = new CustomAlertActivity.Builder()
+                        .setActivity(getActivity())
+                        .setTitle("Thông báo")
+                        .setMessage("Không lấy được dữ liệu")
+                        .setType("error")
+                        .Build();
+                customAlertActivity.showDialog();
             }
         } catch (IOException | JSONException e) {
+            CustomAlertActivity customAlertActivity = new CustomAlertActivity.Builder()
+                    .setActivity(getActivity())
+                    .setTitle("Thông báo")
+                    .setMessage("Đã xảy ra lỗi!!!")
+                    .setType("error")
+                    .Build();
+            customAlertActivity.showDialog();
             e.printStackTrace();
         }
     }

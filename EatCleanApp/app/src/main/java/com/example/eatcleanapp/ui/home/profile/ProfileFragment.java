@@ -1,9 +1,7 @@
 package com.example.eatcleanapp.ui.home.profile;
 
 import android.Manifest;
-import android.app.Activity;
 import android.app.Dialog;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -14,18 +12,14 @@ import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 
-import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
-import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.fragment.NavHostFragment;
 
-import android.os.Environment;
 import android.os.Handler;
 import android.provider.MediaStore;
 import android.provider.Settings;
-import android.util.Base64;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -34,15 +28,12 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.Button;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
-import com.example.eatcleanapp.API.APIService;
-import com.example.eatcleanapp.BuildConfig;
+import com.example.eatcleanapp.CustomAlert.CustomAlertActivity;
 import com.example.eatcleanapp.MainActivity;
 import com.example.eatcleanapp.R;
 import com.example.eatcleanapp.RealPathUtil;
@@ -50,6 +41,7 @@ import com.example.eatcleanapp.SubActivity;
 import com.example.eatcleanapp.model.users;
 import com.example.eatcleanapp.ui.home.LoadingDialog;
 import com.example.eatcleanapp.ui.nguoidung.data_local.DataLocalManager;
+import com.google.gson.Gson;
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.MultiplePermissionsReport;
 import com.karumi.dexter.PermissionToken;
@@ -63,10 +55,7 @@ import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -88,20 +77,14 @@ public class ProfileFragment extends Fragment {
     private users user;
     private TextView txv_profile_userName, txv_profile_email, txv_profile_fullName, txv_profile_title_fullName, txv_profile_soDienThoai;
     private Uri mUri;
-    private LoadingDialog loadingDialog;
     private static final MediaType MEDIA_TYPE_PNG = MediaType.parse("image/*");
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-    }
-
+    private LoadingDialog loadingDialog;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         mSubActivity = (SubActivity) getActivity();
-        if (mSubActivity != null) {
-            mSubActivity.getSupportActionBar().setHomeAsUpIndicator(R.drawable.back24);
-        }
+        mSubActivity.getSupportActionBar().setHomeAsUpIndicator(R.drawable.back24);
+        loadingDialog = new LoadingDialog(mSubActivity);
         view = inflater.inflate(R.layout.fragment_profile, container, false);
         Mapping();
         user = DataLocalManager.getUser();
@@ -174,25 +157,63 @@ public class ProfileFragment extends Fragment {
         btn_save_avatar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                loadingDialog.startLoadingDialog();
                 v.startAnimation(animButton);
                 handler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
                         if(mUri != null){
-                            loadingDialog.startLoadingDialog();
-                            UploadAvatar(user.get_id());
+                            UploadAvatar();
                         }
                     }
                 },400);
             }
         });
-
         return view;
     }
 
-    private void UploadAvatar(String IDUser){
+    private void GetInformation(){
+        OkHttpClient client = new OkHttpClient().newBuilder()
+                .build();
+        Request request = new Request.Builder()
+                .url("https://eat-clean-nhom04.herokuapp.com/me/information")
+                .method("GET", null)
+                .addHeader("Authorization", "Bearer " + user.getToken())
+                .build();
+        try {
+            Response response = client.newCall(request).execute();
+            String jsonData = response.body().string();
+            JSONObject Jobject = new JSONObject(jsonData);
+            if (response.isSuccessful()){
+                JSONObject data = Jobject.getJSONObject("data");
+                Gson g = new Gson();
+                user = g.fromJson(String.valueOf(data), users.class);
+                DataLocalManager.setUser(user);
+            }
+            else{
+                CustomAlertActivity customAlertActivity = new CustomAlertActivity.Builder()
+                        .setActivity(mSubActivity)
+                        .setTitle("Thông báo")
+                        .setMessage("Chỉnh sửa tài khoản thất bại")
+                        .setType("error")
+                        .Build();
+                customAlertActivity.showDialog();
+            }
+        } catch (IOException | JSONException e) {
+            CustomAlertActivity customAlertActivity = new CustomAlertActivity.Builder()
+                    .setActivity(mSubActivity)
+                    .setTitle("Thông báo")
+                    .setMessage("Đã xảy ra lỗi!!!")
+                    .setType("error")
+                    .Build();
+            customAlertActivity.showDialog();
+            e.printStackTrace();
+        }
+    }
+
+
+    private void UploadAvatar(){
         String strRealPath = RealPathUtil.getRealPath(view.getContext(), mUri);
-        Log.e("AAA", strRealPath);
         File file = new File(strRealPath);
         OkHttpClient client = new OkHttpClient().newBuilder()
                 .build();
@@ -208,18 +229,38 @@ public class ProfileFragment extends Fragment {
                 .build();
         try {
             Response response = client.newCall(request).execute();
-            if (response.isSuccessful()){
-                loadingDialog.dismissDialog();
-                Toast.makeText(mSubActivity, "Lưu hình ảnh thành công", Toast.LENGTH_SHORT).show();
+            if(response.isSuccessful()){
+                //GetInformation();
+                CustomAlertActivity customAlertActivity = new CustomAlertActivity.Builder()
+                        .setActivity(mSubActivity)
+                        .setTitle("Thông báo")
+                        .setMessage("Thêm hình ảnh avatar thành công")
+                        .setType("success")
+                        .Build();
+                customAlertActivity.showDialog();
             }
             else {
                 String jsonData = response.body().string();
                 JSONObject jsonObject = new JSONObject(jsonData);
                 JSONObject error = jsonObject.getJSONObject("error");
-                loadingDialog.dismissDialog();
-                Toast.makeText(mSubActivity,  error.toString() , Toast.LENGTH_LONG).show();
+                CustomAlertActivity customAlertActivity = new CustomAlertActivity.Builder()
+                        .setActivity(mSubActivity)
+                        .setTitle("Thông báo")
+                        .setMessage("Thêm hình ảnh avatar thất bại")
+                        .setType("error")
+                        .Build();
+                customAlertActivity.showDialog();
             }
+            loadingDialog.dismissDialog();
         } catch (IOException | JSONException e) {
+            CustomAlertActivity customAlertActivity = new CustomAlertActivity.Builder()
+                    .setActivity(mSubActivity)
+                    .setTitle("Thông báo")
+                    .setMessage("Đã xảy ra lỗi!!!")
+                    .setType("error")
+                    .Build();
+            customAlertActivity.showDialog();
+            loadingDialog.dismissDialog();
             e.printStackTrace();
         }
     }
@@ -244,35 +285,32 @@ public class ProfileFragment extends Fragment {
                 if(resultCode == mSubActivity.RESULT_OK){
                     Uri pickImage = data.getData();
                     mUri = pickImage;
-                    String paths = pickImage.getPath();
-                    File imageFile = new File(paths);
-                    Log.e("AAA", "" + imageFile);
                     imageView_avatar_user.setImageURI(pickImage);
                     break;
                 }
         }
     }
 
-    public Uri getImageUri(Context inContext, Bitmap inImage) {
-        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-        inImage.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
-        String path = MediaStore.Images.Media.insertImage(inContext.getContentResolver(), inImage, String.valueOf(System.currentTimeMillis()), null);
-        return Uri.parse(path);
-    }
-
-    private void openRequest(){
+    private Dialog createDialog(int layout){
         Dialog dialog = new Dialog(view.getContext());
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setContentView(R.layout.layout_dialog_request);
+        dialog.setContentView(layout);
         Window window = dialog.getWindow();
         if(window == null){
-            return;
+            return null;
         }
         window.setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT);
         window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         WindowManager.LayoutParams windowAtributes = window.getAttributes();
         windowAtributes.gravity = Gravity.CENTER;
         window.setAttributes(windowAtributes);
+        return dialog;
+    }
+
+    private void openRequest(){
+        Dialog dialog = createDialog(R.layout.layout_dialog_request);
+        if(dialog == null)
+            return;
         Button btnAccept = (Button)dialog.findViewById(R.id.btn_accept_request);
         btnAccept.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -301,7 +339,7 @@ public class ProfileFragment extends Fragment {
                         .withErrorListener(new PermissionRequestErrorListener() {
                             @Override
                             public void onError(DexterError dexterError) {
-                                Toast.makeText(mSubActivity, "Có lỗi xảy ra!", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(mSubActivity, "Có lỗi xảy ra!", Toast.LENGTH_LONG).show();
                             }
                         }).onSameThread().check();
             }
@@ -311,18 +349,9 @@ public class ProfileFragment extends Fragment {
     }
 
     private void openDialogChooseImage(){
-        Dialog dialog = new Dialog(view.getContext());
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setContentView(R.layout.layout_choose_image);
-        Window window = dialog.getWindow();
-        if(window == null){
+        Dialog dialog = createDialog(R.layout.layout_choose_image);
+        if(dialog == null)
             return;
-        }
-        window.setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT);
-        window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        WindowManager.LayoutParams windowAttributes = window.getAttributes();
-        windowAttributes.gravity = Gravity.CENTER;
-        window.setAttributes(windowAttributes);
 
         Button btn_chooseImage_Camera = (Button)dialog.findViewById(R.id.btn_chooseImage_Camera);
         Button btn_chooseImage_Media = (Button)dialog.findViewById(R.id.btn_chooseImage_Media);
@@ -333,12 +362,6 @@ public class ProfileFragment extends Fragment {
             public void onClick(View v) {
                 dialog.dismiss();
                 Intent takePhoto = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                /*File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
-                        Environment.DIRECTORY_PICTURES), "AvatarFolder");
-                mediaStorageDir.mkdirs();
-                mUri = Uri.fromFile(new File(mediaStorageDir.getPath() + File.separator +
-                        "avatar.jpg"));
-                takePhoto.putExtra(MediaStore.EXTRA_OUTPUT, mUri);*/
                 startActivityForResult(takePhoto, 0);
             }
         });
@@ -363,6 +386,13 @@ public class ProfileFragment extends Fragment {
         dialog.show();
     }
 
+    public Uri getImageUri(Context inContext, Bitmap inImage) {
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        inImage.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
+        String path = MediaStore.Images.Media.insertImage(inContext.getContentResolver(), inImage, String.valueOf(System.currentTimeMillis()), null);
+        return Uri.parse(path);
+    }
+
     private void Mapping() {
         mSubActivity.setText("Thông tin tài khoản");
         btn_profile_edit            = (Button)view.findViewById(R.id.btn_profile_edit);
@@ -376,7 +406,6 @@ public class ProfileFragment extends Fragment {
         txv_profile_fullName        = (TextView)view.findViewById(R.id.txv_profile_fullName);
         txv_profile_title_fullName  = (TextView)view.findViewById(R.id.txv_profile_title_fullName);
         txv_profile_soDienThoai = (TextView) view.findViewById(R.id.txv_profile_SDT);
-        loadingDialog = new LoadingDialog(mSubActivity);
     }
 
 

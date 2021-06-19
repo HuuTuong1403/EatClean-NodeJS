@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -22,6 +23,7 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
+import com.example.eatcleanapp.CustomAlert.CustomAlertActivity;
 import com.example.eatcleanapp.IClickListener;
 import com.example.eatcleanapp.MainActivity;
 import com.example.eatcleanapp.R;
@@ -50,7 +52,6 @@ public class RecipesFragment extends Fragment implements IClickListener {
     private RecyclerView rcvRecipes;
     private RecipesAdapter mRecipesAdapter;
     private List<recipes> listRecipes, oldList;
-    private RequestQueue requestQueue;
     private EditText edt_search_recycle;
     private MainActivity mMainActivity;
     private LoadingDialog loadingDialog;
@@ -61,6 +62,7 @@ public class RecipesFragment extends Fragment implements IClickListener {
         mMainActivity = (MainActivity) getActivity();
         view = inflater.inflate(R.layout.fragment_recipes, container, false);
         loadingDialog = new LoadingDialog(mMainActivity);
+        Handler handler = new Handler();
         Mapping();
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy((policy));
@@ -68,9 +70,13 @@ public class RecipesFragment extends Fragment implements IClickListener {
         StaggeredGridLayoutManager gridLayoutManager = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);;
         rcvRecipes.setLayoutManager(gridLayoutManager);
         loadingDialog.startLoadingDialog();
-        GetData();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                GetData();
+            }
+        }, 400);
         rcvRecipes.setAdapter(mRecipesAdapter);
-        Handler handler = new Handler();
 
         edt_search_recycle.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
@@ -119,12 +125,10 @@ public class RecipesFragment extends Fragment implements IClickListener {
         String s = edt_search_recycle.getText().toString();
         mRecipesAdapter.getFilter().filter(s);
         listRecipes = mRecipesAdapter.change();
-        Log.e("AAA", "size: " + listRecipes.size() + " string: " + s);
     }
 
 
     private void Mapping(){
-        requestQueue = Volley.newRequestQueue(view.getContext());
         listRecipes = new ArrayList<>();
         oldList = new ArrayList<>();
         rcvRecipes = view.findViewById(R.id.list_recipes);
@@ -144,7 +148,6 @@ public class RecipesFragment extends Fragment implements IClickListener {
             String jsonData = response.body().string();
             JSONObject Jobject = new JSONObject(jsonData);
             if (response.isSuccessful()){
-                //JSONObject data = Jobject.getJSONObject("data");
                 JSONArray myResponse = Jobject.getJSONArray("data");
                 for (int i = 0; i < myResponse.length();i ++){
                     JSONObject object = myResponse.getJSONObject(i);
@@ -163,21 +166,32 @@ public class RecipesFragment extends Fragment implements IClickListener {
                         );
                     listRecipes.add(recipe);
                     oldList.add(recipe);
+                    loadingDialog.dismissDialog();
                 }
                 mRecipesAdapter.setData(listRecipes);
                 mRecipesAdapter.setOldData(oldList);
-                loadingDialog.dismissDialog();
             }
             else {
                 JSONObject error = Jobject.getJSONObject("error");
-                Toast.makeText(view.getContext(),  error.toString() , Toast.LENGTH_LONG).show();
+                CustomAlertActivity customAlertActivity = new CustomAlertActivity.Builder()
+                        .setActivity(getActivity())
+                        .setTitle("Thông báo")
+                        .setMessage("Không lấy được dữ liệu")
+                        .setType("error")
+                        .Build();
+                customAlertActivity.showDialog();
             }
-
+            loadingDialog.dismissDialog();
         } catch (IOException | JSONException e) {
-            Toast.makeText(view.getContext(),   e.toString() , Toast.LENGTH_LONG).show();
+            CustomAlertActivity customAlertActivity = new CustomAlertActivity.Builder()
+                    .setActivity(getActivity())
+                    .setTitle("Thông báo")
+                    .setMessage("Đã xảy ra lỗi!!!")
+                    .setType("error")
+                    .Build();
+            customAlertActivity.showDialog();
+            loadingDialog.dismissDialog();
         }
-
-
     }
 
     @Override

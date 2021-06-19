@@ -32,6 +32,7 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.example.eatcleanapp.API.APIService;
+import com.example.eatcleanapp.CustomAlert.CustomAlertActivity;
 import com.example.eatcleanapp.IClickListener;
 import com.example.eatcleanapp.MainActivity;
 import com.example.eatcleanapp.R;
@@ -40,6 +41,7 @@ import com.example.eatcleanapp.model.comments;
 import com.example.eatcleanapp.model.favoriterecipes;
 import com.example.eatcleanapp.model.recipes;
 import com.example.eatcleanapp.model.users;
+import com.example.eatcleanapp.ui.home.LoadingDialog;
 import com.example.eatcleanapp.ui.home.detail.DetailActivity;
 import com.example.eatcleanapp.ui.home.signin.SignInFragment;
 import com.example.eatcleanapp.ui.nguoidung.data_local.DataLocalManager;
@@ -76,34 +78,65 @@ public class TabDetailCommentFragment extends Fragment implements IClickListener
     private recipes recipe;
     private String IDComment;
     private ImageView imgV_comment_imageUser;
-    private MainActivity mMainActivity;
-
+    private LoadingDialog loadingDialog;
+    private Handler handler;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         detailActivity  = (DetailActivity) getActivity();
+        loadingDialog = new LoadingDialog(detailActivity);
         view = inflater.inflate(R.layout.fragment_tab_detail_comment, container, false);
         Mapping();
+
+        Animation animScale = AnimationUtils.loadAnimation(view.getContext(), R.anim.anim_scale);
+        handler = new Handler();
+
         CreateRecyclerView();
-        GetData();
+
         rcvComment.setAdapter(commentAdapter);
+
 
         btn_comment_send.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(edt_comment_addComment.getText().toString().isEmpty()){
-                    Toast.makeText(detailActivity, "Trường nhập không được trống", Toast.LENGTH_LONG).show();
-                }
-                else{
-                    String IDRecipe = recipe.get_id();
-                    String Comment = edt_comment_addComment.getText().toString();
-
-                    sendAddComment(IDRecipe, Comment);
-                }
+                loadingDialog.startLoadingDialog();
+                v.startAnimation(animScale);
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        if(edt_comment_addComment.getText().toString().isEmpty()){
+                            CustomAlertActivity customAlertActivity = new CustomAlertActivity.Builder()
+                                    .setActivity(detailActivity)
+                                    .setTitle("Thông báo")
+                                    .setMessage("Trường nhập không được trống")
+                                    .setType("error")
+                                    .Build();
+                            customAlertActivity.showDialog();
+                            loadingDialog.dismissDialog();
+                        }
+                        else{
+                            String IDRecipe = recipe.get_id();
+                            String Comment = edt_comment_addComment.getText().toString();
+                            sendAddComment(IDRecipe, Comment);
+                        }
+                    }
+                }, 400);
             }
         });
 
         return view;
+    }
+
+    @Override
+    public void onStart() {
+        loadingDialog.startLoadingDialog();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                GetData();
+            }
+        }, 400);
+        super.onStart();
     }
 
     private void sendAddComment(String IDRecipe, String Comment) {
@@ -135,26 +168,28 @@ public class TabDetailCommentFragment extends Fragment implements IClickListener
             }
             else {
                 JSONObject error = Jobject.getJSONObject("error");
-                Toast.makeText(view.getContext(),  error.toString() , Toast.LENGTH_LONG).show();
-            }
+                CustomAlertActivity customAlertActivity = new CustomAlertActivity.Builder()
+                        .setActivity(detailActivity)
+                        .setTitle("Thông báo")
+                        .setMessage("Thêm comment thất bại")
+                        .setType("error")
+                        .Build();
+                customAlertActivity.showDialog();            }
+            loadingDialog.dismissDialog();
         } catch (IOException | JSONException e) {
+            CustomAlertActivity customAlertActivity = new CustomAlertActivity.Builder()
+                    .setActivity(detailActivity)
+                    .setTitle("Thông báo")
+                    .setMessage("Đã xảy ra lỗi!!!")
+                    .setType("error")
+                    .Build();
+            customAlertActivity.showDialog();
             e.printStackTrace();
+            loadingDialog.dismissDialog();
         }
     }
 
     private void GetData() {
-//        APIService.apiService.getCommentByRecipe(recipe.get_id()).enqueue(new Callback<List<comments>>() {
-//            @Override
-//            public void onResponse(Call<List<comments>> call, Response<List<comments>> response) {
-//                listComments = response.body();
-//                commentAdapter.setData(listComments);
-//            }
-//
-//            @Override
-//            public void onFailure(Call<List<comments>> call, Throwable t) {
-//                Toast.makeText(detailActivity, "Call API Error", Toast.LENGTH_SHORT).show();
-//            }
-//        });
         listComments.clear();
         OkHttpClient client = new OkHttpClient().newBuilder()
                 .build();
@@ -167,7 +202,6 @@ public class TabDetailCommentFragment extends Fragment implements IClickListener
             String jsonData = response.body().string();
             JSONObject Jobject = new JSONObject(jsonData);
             if (response.isSuccessful()){
-                //JSONObject data = Jobject.getJSONObject("data");
                 JSONArray myResponse = Jobject.getJSONArray("data");
                 for (int i = 0; i < myResponse.length();i ++){
                     JSONObject object = myResponse.getJSONObject(i);
@@ -183,8 +217,17 @@ public class TabDetailCommentFragment extends Fragment implements IClickListener
                 }
                 commentAdapter.setData(listComments);
             }
+            loadingDialog.dismissDialog();
         } catch (IOException | JSONException e) {
+            CustomAlertActivity customAlertActivity = new CustomAlertActivity.Builder()
+                    .setActivity(detailActivity)
+                    .setTitle("Thông báo")
+                    .setMessage("Đã xảy ra lỗi!!!")
+                    .setType("error")
+                    .Build();
+            customAlertActivity.showDialog();
             e.printStackTrace();
+            loadingDialog.dismissDialog();
         }
     }
 
@@ -237,7 +280,6 @@ public class TabDetailCommentFragment extends Fragment implements IClickListener
         }
         else{
             if(listComments.get(position).getIDUser().equals(user.get_id())){
-                Handler handler = new Handler();
                 Dialog dialog = new Dialog(view.getContext());
                 dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
                 dialog.setContentView(R.layout.dialog_request_favorite_recipes);
@@ -259,6 +301,7 @@ public class TabDetailCommentFragment extends Fragment implements IClickListener
                 btn_accept.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
+                        loadingDialog.startLoadingDialog();
                         v.startAnimation(animTranslate);
                         handler.postDelayed(new Runnable() {
                             @Override
@@ -286,23 +329,17 @@ public class TabDetailCommentFragment extends Fragment implements IClickListener
                 dialog.show();
             }
             else{
-                Toast.makeText(detailActivity, "Không thể xóa comment của người khác", Toast.LENGTH_SHORT).show();
-            }
+                CustomAlertActivity customAlertActivity = new CustomAlertActivity.Builder()
+                        .setActivity(detailActivity)
+                        .setTitle("Thông báo")
+                        .setMessage("Không được xóa comment của người khác")
+                        .setType("error")
+                        .Build();
+                customAlertActivity.showDialog();            }
         }
     }
 
     private void deleteComment(String IDComment){
-//        APIService.apiService.deleteComment(IDComment).enqueue(new Callback<comments>() {
-//            @Override
-//            public void onResponse(Call<comments> call, Response<comments> response) {
-//                GetData();
-//            }
-//
-//            @Override
-//            public void onFailure(Call<comments> call, Throwable t) {
-//                Toast.makeText(detailActivity, "Không thể xóa comment", Toast.LENGTH_SHORT).show();
-//            }
-//        });
         users user = DataLocalManager.getUser();
         OkHttpClient client = new OkHttpClient().newBuilder()
                 .build();
@@ -322,10 +359,25 @@ public class TabDetailCommentFragment extends Fragment implements IClickListener
             }
             else {
                 JSONObject error = Jobject.getJSONObject("error");
-                Toast.makeText(view.getContext(),  error.toString() , Toast.LENGTH_LONG).show();
+                CustomAlertActivity customAlertActivity = new CustomAlertActivity.Builder()
+                        .setActivity(detailActivity)
+                        .setTitle("Thông báo")
+                        .setMessage("Xóa comment thất bại")
+                        .setType("error")
+                        .Build();
+                customAlertActivity.showDialog();
             }
+            loadingDialog.dismissDialog();
         } catch (IOException | JSONException e) {
             e.printStackTrace();
+            CustomAlertActivity customAlertActivity = new CustomAlertActivity.Builder()
+                    .setActivity(detailActivity)
+                    .setTitle("Thông báo")
+                    .setMessage("Đã xảy ra lỗi!!!")
+                    .setType("error")
+                    .Build();
+            customAlertActivity.showDialog();
+            loadingDialog.dismissDialog();
         }
     }
 }

@@ -18,8 +18,8 @@
 
         <com.makeramen.roundedimageview.RoundedImageView
             android:id="@+id/blogs_image"
-            android:layout_width="130dp"
-            android:layout_height="130dp"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
             app:riv_corner_radius_top_right="20dip"
             app:riv_corner_radius_bottom_right="20dip"
             android:scaleType="centerCrop"
@@ -40,7 +40,7 @@
                 android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
                 android:text="Giảm cân bằng trái cây"
-                android:textSize="18sp"
+                android:textSize="16sp"
                 android:fontFamily="@font/arialbd"/>
             <LinearLayout
                 android:layout_marginStart="5dp"
@@ -57,7 +57,7 @@
                     android:id="@+id/blogs_txv_blogsAuthor"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="13sp"
+                    android:textSize="12sp"
                     android:fontFamily="@font/arialbd"
                     android:textColor="@color/white"
                     android:text="Người đăng: Nguyễn Hữu Tường"
@@ -79,7 +79,7 @@
                     android:id="@+id/blogs_txv_blogsDateCreate"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="14sp"
+                    android:textSize="12sp"
                     android:fontFamily="@font/arialbd"
                     android:textColor="@color/white"
                     android:text="Ngày đăng bài: 07/06/2021"

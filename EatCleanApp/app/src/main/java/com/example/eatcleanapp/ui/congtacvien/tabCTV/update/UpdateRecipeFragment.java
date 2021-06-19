@@ -16,6 +16,7 @@ import android.os.Bundle;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import android.os.Handler;
 import android.os.StrictMode;
 import android.provider.MediaStore;
 import android.provider.Settings;
@@ -27,6 +28,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -34,10 +37,12 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.example.eatcleanapp.API.APIService;
+import com.example.eatcleanapp.CustomAlert.CustomAlertActivity;
 import com.example.eatcleanapp.R;
 import com.example.eatcleanapp.RealPathUtil;
 import com.example.eatcleanapp.model.recipes;
 import com.example.eatcleanapp.model.users;
+import com.example.eatcleanapp.ui.home.LoadingDialog;
 import com.example.eatcleanapp.ui.home.detail.DetailActivity;
 import com.example.eatcleanapp.ui.nguoidung.data_local.DataLocalManager;
 import com.karumi.dexter.Dexter;
@@ -72,6 +77,7 @@ public class UpdateRecipeFragment extends Fragment {
     private EditText edt_updateRecipe_recipeTitle, edt_updateRecipe_recipeContent, edt_updateRecipe_recipeNutritional, edt_updateRecipe_recipeIngredients, edt_updateRecipe_recipeSteps, edt_updateRecipe_recipeTime;
     private Button btn_updateRecipe_sendApproval;
     private Uri mUri;
+    private LoadingDialog loadingDialog;
     private static final MediaType MEDIA_TYPE_PNG = MediaType.parse("image/*");
 
     @SuppressLint("ClickableViewAccessibility")
@@ -79,11 +85,16 @@ public class UpdateRecipeFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         detailActivity = (DetailActivity) getActivity();
+        loadingDialog = new LoadingDialog(detailActivity);
         view = inflater.inflate(R.layout.fragment_update_recipe, container, false);
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy((policy));
         Mapping();
         setData();
+
+        Animation animScale = AnimationUtils.loadAnimation(view.getContext(), R.anim.anim_scale);
+        Handler handler = new Handler();
+
         imgV_updateRecipe_uploadImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -100,7 +111,14 @@ public class UpdateRecipeFragment extends Fragment {
         btn_updateRecipe_sendApproval.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sendUpdate();
+                loadingDialog.startLoadingDialog();
+                v.startAnimation(animScale);
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        sendUpdate();
+                    }
+                }, 400);
             }
         });
 
@@ -140,7 +158,14 @@ public class UpdateRecipeFragment extends Fragment {
                 edt_updateRecipe_recipeIngredients.getText().toString().isEmpty() ||
                 edt_updateRecipe_recipeSteps.getText().toString().isEmpty() ||
                 edt_updateRecipe_recipeTime.getText().toString().isEmpty()) {
-            Toast.makeText(detailActivity, "Các trường nhập liệu không được trống", Toast.LENGTH_LONG).show();
+            CustomAlertActivity customAlertActivity = new CustomAlertActivity.Builder()
+                    .setActivity(detailActivity)
+                    .setTitle("Thông báo")
+                    .setMessage("Các trường nhập liệu không được trống")
+                    .setType("error")
+                    .Build();
+            customAlertActivity.showDialog();
+            loadingDialog.dismissDialog();
         }
         else{
             String recipeTitle          = edt_updateRecipe_recipeTitle.getText().toString();
@@ -151,7 +176,6 @@ public class UpdateRecipeFragment extends Fragment {
             String recipeStep           = edt_updateRecipe_recipeSteps.getText().toString();
             String recipeTime           = edt_updateRecipe_recipeTime.getText().toString();
             String recipeStatus         = "waittingforapproval";
-
             updateRecipeCtv(recipe.get_id(), recipeTitle, recipeAuthor, recipeContent, recipeNutritional, recipeIngredient, recipeStep, recipeTime, recipeStatus);
         }
     }
@@ -202,16 +226,37 @@ public class UpdateRecipeFragment extends Fragment {
         try {
             Response response = client.newCall(request).execute();
             if (response.isSuccessful()){
-                Toast.makeText(view.getContext(),  "Chỉnh sửa thành công", Toast.LENGTH_LONG).show();
+                CustomAlertActivity customAlertActivity = new CustomAlertActivity.Builder()
+                        .setActivity(detailActivity)
+                        .setTitle("Thông báo")
+                        .setMessage("Chỉnh sửa công thức thành công")
+                        .setType("success")
+                        .Build();
+                customAlertActivity.showDialog();
             }
             else {
                 String jsonData = response.body().string();
                 JSONObject jsonObject = new JSONObject(jsonData);
                 JSONObject error = jsonObject.getJSONObject("error");
-                Toast.makeText(view.getContext(),  error.toString() , Toast.LENGTH_LONG).show();
+                CustomAlertActivity customAlertActivity = new CustomAlertActivity.Builder()
+                        .setActivity(detailActivity)
+                        .setTitle("Thông báo")
+                        .setMessage("Chỉnh sửa công thức thất bại")
+                        .setType("error")
+                        .Build();
+                customAlertActivity.showDialog();
             }
+            loadingDialog.dismissDialog();
         } catch (IOException | JSONException e) {
+            CustomAlertActivity customAlertActivity = new CustomAlertActivity.Builder()
+                    .setActivity(detailActivity)
+                    .setTitle("Thông báo")
+                    .setMessage("Đã xảy ra lỗi!!!")
+                    .setType("error")
+                    .Build();
+            customAlertActivity.showDialog();
             e.printStackTrace();
+            loadingDialog.dismissDialog();
         }
     }
 
@@ -238,22 +283,28 @@ public class UpdateRecipeFragment extends Fragment {
             edt_updateRecipe_recipeNutritional.setText(recipe.getNutritionalIngredients());
             edt_updateRecipe_recipeIngredients.setText(recipe.getIngredients());
             edt_updateRecipe_recipeSteps.setText(recipe.getSteps());
-            //edt_updateRecipe_recipeTime.setText(recipe.ge());
         }
     }
-    private void openRequest(){
+    private Dialog createDialog(int layout){
         Dialog dialog = new Dialog(view.getContext());
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setContentView(R.layout.layout_dialog_request);
+        dialog.setContentView(layout);
         Window window = dialog.getWindow();
         if(window == null){
-            return;
+            return null;
         }
         window.setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT);
         window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         WindowManager.LayoutParams windowAtributes = window.getAttributes();
         windowAtributes.gravity = Gravity.CENTER;
         window.setAttributes(windowAtributes);
+        return dialog;
+    }
+
+    private void openRequest(){
+        Dialog dialog = createDialog(R.layout.layout_dialog_request);
+        if(dialog == null)
+            return;
         Button btnAccept = (Button)dialog.findViewById(R.id.btn_accept_request);
         btnAccept.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -282,7 +333,7 @@ public class UpdateRecipeFragment extends Fragment {
                         .withErrorListener(new PermissionRequestErrorListener() {
                             @Override
                             public void onError(DexterError dexterError) {
-                                Toast.makeText(detailActivity, "Có lỗi xảy ra!", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(detailActivity, "Có lỗi xảy ra!", Toast.LENGTH_LONG).show();
                             }
                         }).onSameThread().check();
             }
@@ -292,18 +343,9 @@ public class UpdateRecipeFragment extends Fragment {
     }
 
     private void openDialogChooseImage(){
-        Dialog dialog = new Dialog(view.getContext());
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setContentView(R.layout.layout_choose_image);
-        Window window = dialog.getWindow();
-        if(window == null){
+        Dialog dialog = createDialog(R.layout.layout_choose_image);
+        if(dialog == null)
             return;
-        }
-        window.setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT);
-        window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        WindowManager.LayoutParams windowAttributes = window.getAttributes();
-        windowAttributes.gravity = Gravity.CENTER;
-        window.setAttributes(windowAttributes);
 
         Button btn_chooseImage_Camera = (Button)dialog.findViewById(R.id.btn_chooseImage_Camera);
         Button btn_chooseImage_Media = (Button)dialog.findViewById(R.id.btn_chooseImage_Media);
@@ -358,9 +400,6 @@ public class UpdateRecipeFragment extends Fragment {
                 if(resultCode == detailActivity.RESULT_OK){
                     Uri pickImage = data.getData();
                     mUri = pickImage;
-                    String paths = pickImage.getPath();
-                    File imageFile = new File(paths);
-                    Log.e("AAA", "" + imageFile);
                     imgV_updateRecipe_uploadImage.setImageURI(pickImage);
                     break;
                 }
@@ -373,5 +412,4 @@ public class UpdateRecipeFragment extends Fragment {
         String path = MediaStore.Images.Media.insertImage(inContext.getContentResolver(), inImage, String.valueOf(System.currentTimeMillis()), null);
         return Uri.parse(path);
     }
-
 }

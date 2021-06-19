@@ -7,12 +7,14 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.example.eatcleanapp.API.APIService;
+import com.example.eatcleanapp.CustomAlert.CustomAlertActivity;
 import com.example.eatcleanapp.IClickListener;
 import com.example.eatcleanapp.MainActivity;
 import com.example.eatcleanapp.R;
@@ -46,16 +48,18 @@ public class ListAddBlogFragment extends Fragment implements IClickListener {
     private BlogsAdapter mBlogsAdapter;
     private List<blogs> listBlogs;
     private MainActivity mMainActivity;
-    private List<blogimages> listBlogsImage;
+    private LoadingDialog loadingDialog;
+    private Handler handler;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         mMainActivity = (MainActivity) getActivity();
+        loadingDialog = new LoadingDialog(mMainActivity);
+        handler = new Handler();
         view = inflater.inflate(R.layout.fragment_list_add_blog, container, false);
         Mapping();
         CreateRecyclerView();
-        GetData();
         rcvBlogs.setAdapter(mBlogsAdapter);
 
         return view;
@@ -67,7 +71,8 @@ public class ListAddBlogFragment extends Fragment implements IClickListener {
         rcvBlogs.setLayoutManager(linearLayoutManager);
     }
 
-    private void GetData(){
+    public void GetData(){
+        listBlogs.clear();
         users user = DataLocalManager.getUser();
         OkHttpClient client = new OkHttpClient().newBuilder()
                 .build();
@@ -81,7 +86,6 @@ public class ListAddBlogFragment extends Fragment implements IClickListener {
             String jsonData = response.body().string();
             JSONObject Jobject = new JSONObject(jsonData);
             if (response.isSuccessful()){
-                //JSONObject data = Jobject.getJSONObject("data");
                 JSONArray myResponse = Jobject.getJSONArray("data");
                 for (int i = 0; i < myResponse.length();i ++){
                     JSONObject object = myResponse.getJSONObject(i);
@@ -104,20 +108,44 @@ public class ListAddBlogFragment extends Fragment implements IClickListener {
             }
             else {
                 JSONObject error = Jobject.getJSONObject("error");
-                Toast.makeText(view.getContext(),  error.toString() , Toast.LENGTH_LONG).show();
+                CustomAlertActivity customAlertActivity = new CustomAlertActivity.Builder()
+                        .setActivity(mMainActivity)
+                        .setTitle("Thông báo")
+                        .setMessage("Không lấy được dữ liệu")
+                        .setType("error")
+                        .Build();
+                customAlertActivity.showDialog();
             }
+            loadingDialog.dismissDialog();
         } catch (IOException | JSONException e) {
+            CustomAlertActivity customAlertActivity = new CustomAlertActivity.Builder()
+                    .setActivity(mMainActivity)
+                    .setTitle("Thông báo")
+                    .setMessage("Đã xảy ra lỗi!!!")
+                    .setType("error")
+                    .Build();
+            customAlertActivity.showDialog();
             e.printStackTrace();
+            loadingDialog.dismissDialog();
         }
         mBlogsAdapter.setData(listBlogs);
     }
 
-
-
     private void Mapping() {
         listBlogs = new ArrayList<>();
         rcvBlogs = view.findViewById(R.id.list_updateBlog);
-        listBlogsImage = new ArrayList<>();
+    }
+
+    @Override
+    public void onStart() {
+        loadingDialog.startLoadingDialog();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                GetData();
+            }
+        }, 400);
+        super.onStart();
     }
 
     @Override

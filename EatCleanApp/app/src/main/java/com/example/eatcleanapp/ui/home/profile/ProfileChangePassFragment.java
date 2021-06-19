@@ -17,6 +17,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.example.eatcleanapp.API.APIService;
+import com.example.eatcleanapp.CustomAlert.CustomAlertActivity;
 import com.example.eatcleanapp.R;
 import com.example.eatcleanapp.SubActivity;
 import com.example.eatcleanapp.model.users;
@@ -63,25 +64,38 @@ public class ProfileChangePassFragment extends Fragment {
                     @Override
                     public void run() {
                         if(profileChangePass_edt_oldPassword.getText().toString().isEmpty() || profileChangePass_edt_newPassword.getText().toString().isEmpty() || profileChangePass_edt_newPasswordAgain.getText().toString().isEmpty()){
-                            Toast.makeText(mSubActivity, "Trường thông tin không được trống", Toast.LENGTH_SHORT).show();
-                            return;
+                            CustomAlertActivity customAlertActivity = new CustomAlertActivity.Builder()
+                                    .setActivity(mSubActivity)
+                                    .setTitle("Thông báo")
+                                    .setMessage("Trường thông tin không được trống")
+                                    .setType("error")
+                                    .Build();
+                            customAlertActivity.showDialog();
                         }
                         else{
                             String oldPass = profileChangePass_edt_oldPassword.getText().toString();
                             String newPass = profileChangePass_edt_newPassword.getText().toString();
                             String newPassAgain = profileChangePass_edt_newPasswordAgain.getText().toString();
                             if(newPass.equals(oldPass)){
-                                Toast.makeText(mSubActivity, "Mật khẩu mới phải khác mật khẩu cũ", Toast.LENGTH_SHORT).show();
-                            }
+                                CustomAlertActivity customAlertActivity = new CustomAlertActivity.Builder()
+                                        .setActivity(mSubActivity)
+                                        .setTitle("Thông báo")
+                                        .setMessage("Mật khẩu mới phải khác mật khẩu cũ")
+                                        .setType("error")
+                                        .Build();
+                                customAlertActivity.showDialog();                            }
                             else{
                                 if(newPassAgain.equals(newPass)){
                                     changePass(user.getToken(), newPass, newPassAgain,oldPass);
-                                    profileChangePass_edt_oldPassword.setText("");
-                                    profileChangePass_edt_newPassword.setText("");
-                                    profileChangePass_edt_newPasswordAgain.setText("");
                                 }
                                 else{
-                                    Toast.makeText(mSubActivity, "Mật khẩu nhập lại không giống", Toast.LENGTH_SHORT).show();
+                                    CustomAlertActivity customAlertActivity = new CustomAlertActivity.Builder()
+                                            .setActivity(mSubActivity)
+                                            .setTitle("Thông báo")
+                                            .setMessage("Mật khẩu nhập lại không đúng")
+                                            .setType("error")
+                                            .Build();
+                                    customAlertActivity.showDialog();
                                 }
                             }
                         }
@@ -144,13 +158,46 @@ public class ProfileChangePassFragment extends Fragment {
                 Gson g = new Gson();
                 user = g.fromJson(String.valueOf(data), users.class);
                 DataLocalManager.setUser(user);
+                CustomAlertActivity customAlertActivity = new CustomAlertActivity.Builder()
+                        .setActivity(mSubActivity)
+                        .setTitle("Thông báo")
+                        .setMessage("Đổi mật khẩu thành công")
+                        .setType("success")
+                        .Build();
+                customAlertActivity.showDialog();
+                profileChangePass_edt_oldPassword.setText("");
+                profileChangePass_edt_newPassword.setText("");
+                profileChangePass_edt_newPasswordAgain.setText("");
             }
             else {
-                JSONObject error = Jobject.getJSONObject("error");
-                Toast.makeText(view.getContext(),  error.toString() , Toast.LENGTH_LONG).show();
+                String error = Jobject.getString("error");
+                if(error.trim().equals("Wrong Old Password")){
+                    CustomAlertActivity customAlertActivity = new CustomAlertActivity.Builder().setActivity(mSubActivity)
+                            .setTitle("Thông báo")
+                            .setMessage("Mật khẩu cũ không đúng")
+                            .setType("error")
+                            .Build();
+                    customAlertActivity.showDialog();
+                }
+                else{
+                    CustomAlertActivity customAlertActivity = new CustomAlertActivity.Builder()
+                            .setActivity(mSubActivity)
+                            .setTitle("Thông báo")
+                            .setMessage("Đổi mật khẩu thất bại")
+                            .setType("error")
+                            .Build();
+                    customAlertActivity.showDialog();
+                }
             }
         } catch (IOException | JSONException e) {
             e.printStackTrace();
+            CustomAlertActivity customAlertActivity = new CustomAlertActivity.Builder()
+                    .setActivity(mSubActivity)
+                    .setTitle("Thông báo")
+                    .setMessage("Đã xảy ra lỗi!!!")
+                    .setType("error")
+                    .Build();
+            customAlertActivity.showDialog();
         }
     }
 

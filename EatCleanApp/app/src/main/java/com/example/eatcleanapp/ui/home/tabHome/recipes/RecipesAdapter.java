@@ -288,17 +288,17 @@ public class RecipesAdapter extends RecyclerView.Adapter<RecipesAdapter.RecipesV
             String jsonData = response.body().string();
             JSONObject Jobject = new JSONObject(jsonData);
             if (response.isSuccessful()){
-                Toast.makeText(context,  "Xóa món ăn yêu thích thành công" , Toast.LENGTH_LONG).show();
+                Toast.makeText(context,  "Hủy món ăn yêu thích thành công" , Toast.LENGTH_LONG).show();
                 return true;
             }
             else {
                 JSONObject data = Jobject.getJSONObject("data");
                 JSONObject error = Jobject.getJSONObject("error");
-                Toast.makeText(context,  error.toString() , Toast.LENGTH_LONG).show();
+                Toast.makeText(context,  "Hủy món ăn yêu thích không thành công" , Toast.LENGTH_LONG).show();
                 return false;
             }
         } catch (IOException | JSONException e) {
-            Toast.makeText(context,  e.toString() , Toast.LENGTH_LONG).show();
+            Toast.makeText(context,  "Đã xảy ra lỗi khi hủy món ăn yêu thích", Toast.LENGTH_LONG).show();
         }
         return false;
     }
@@ -330,11 +330,11 @@ public class RecipesAdapter extends RecyclerView.Adapter<RecipesAdapter.RecipesV
             else {
                 JSONObject data = Jobject.getJSONObject("data");
                 JSONObject error = Jobject.getJSONObject("error");
-                Toast.makeText(context,  error.toString() , Toast.LENGTH_LONG).show();
+                Toast.makeText(context,  "Thêm món ăn yêu thích không thành công", Toast.LENGTH_LONG).show();
                 return false;
             }
         } catch (IOException | JSONException e) {
-            Toast.makeText(context,  e.toString() , Toast.LENGTH_LONG).show();
+            Toast.makeText(context,  "Đã xảy ra lỗi khi thêm món ăn yêu thích" , Toast.LENGTH_LONG).show();
         }
         return false;
     }
