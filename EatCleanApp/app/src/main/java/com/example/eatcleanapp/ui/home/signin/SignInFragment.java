@@ -284,7 +284,7 @@ public class SignInFragment extends Fragment {
                     CustomAlertActivity customAlertActivity = new CustomAlertActivity.Builder()
                             .setActivity(getActivity())
                             .setTitle("Thông báo")
-                            .setMessage("Email của bạn chưa được kích hoạt! Vui lòng kiểm tra lại")
+                            .setMessage("Email/Tài khoản không tìm thấy hoặc Email chưa được kích hoạt! Vui lòng kiểm tra lại")
                             .setType("error")
                             .Build();
                     customAlertActivity.showDialog();

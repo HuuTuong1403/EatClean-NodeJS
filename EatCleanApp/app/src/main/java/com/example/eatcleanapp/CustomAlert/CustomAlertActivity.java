@@ -73,7 +73,7 @@ public class CustomAlertActivity {
             public void run() {
                 alertDialog.dismiss();
             }
-        }, 2000);
+        }, 3000);
         alertDialog.show();
     }
 
