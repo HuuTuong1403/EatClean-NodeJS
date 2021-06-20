@@ -234,7 +234,8 @@ public class ProfileFragment extends Fragment {
             if(response.isSuccessful()){
                 JSONObject data = jsonObject.getJSONObject("data");
                 Gson g = new Gson();
-                user = g.fromJson(String.valueOf(data), users.class);
+                users usertemp = g.fromJson(String.valueOf(data), users.class);
+                user.setImage(usertemp.getImage());
                 DataLocalManager.setUser(user);
                 //GetInformation();
                 CustomAlertActivity customAlertActivity = new CustomAlertActivity.Builder()
