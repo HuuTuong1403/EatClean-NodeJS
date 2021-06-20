@@ -229,7 +229,13 @@ public class ProfileFragment extends Fragment {
                 .build();
         try {
             Response response = client.newCall(request).execute();
+            String jsonData = response.body().string();
+            JSONObject jsonObject = new JSONObject(jsonData);
             if(response.isSuccessful()){
+                JSONObject data = jsonObject.getJSONObject("data");
+                Gson g = new Gson();
+                user = g.fromJson(String.valueOf(data), users.class);
+                DataLocalManager.setUser(user);
                 //GetInformation();
                 CustomAlertActivity customAlertActivity = new CustomAlertActivity.Builder()
                         .setActivity(mSubActivity)
@@ -240,8 +246,6 @@ public class ProfileFragment extends Fragment {
                 customAlertActivity.showDialog();
             }
             else {
-                String jsonData = response.body().string();
-                JSONObject jsonObject = new JSONObject(jsonData);
                 JSONObject error = jsonObject.getJSONObject("error");
                 CustomAlertActivity customAlertActivity = new CustomAlertActivity.Builder()
                         .setActivity(mSubActivity)
