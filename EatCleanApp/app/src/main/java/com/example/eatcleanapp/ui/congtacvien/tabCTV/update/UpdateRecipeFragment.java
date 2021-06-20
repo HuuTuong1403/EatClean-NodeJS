@@ -283,6 +283,7 @@ public class UpdateRecipeFragment extends Fragment {
             edt_updateRecipe_recipeNutritional.setText(recipe.getNutritionalIngredients());
             edt_updateRecipe_recipeIngredients.setText(recipe.getIngredients());
             edt_updateRecipe_recipeSteps.setText(recipe.getSteps());
+            edt_updateRecipe_recipeTime.setText(recipe.getTime());
         }
     }
     private Dialog createDialog(int layout){
