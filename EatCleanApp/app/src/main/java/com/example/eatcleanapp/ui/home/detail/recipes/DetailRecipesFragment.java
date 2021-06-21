@@ -6,6 +6,7 @@ import android.icu.text.TimeZoneFormat;
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
+import androidx.core.text.HtmlCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentStatePagerAdapter;
 import androidx.viewpager.widget.ViewPager;
@@ -38,7 +39,7 @@ public class DetailRecipesFragment extends Fragment{
     private DetailViewPagerAdapter detailViewPagerAdapter;
     private DetailActivity mDetailActivity;
     private recipes recipes_detail;
-    private TextView txv_show_title_recipes, txv_show_content_recipes;
+    private TextView txv_show_title_recipes, txv_show_content_recipes, txv_show_time_recipes;
     private RoundedImageView image_detail_recipes;
 
     @Override
@@ -56,6 +57,7 @@ public class DetailRecipesFragment extends Fragment{
         image_detail_recipes        = (RoundedImageView)view.findViewById(R.id.image_detail_recipes);
         txv_show_title_recipes      = (TextView)view.findViewById(R.id.txv_show_title_recipes);
         txv_show_content_recipes    = (TextView)view.findViewById(R.id.txv_show_content_recipes);
+        txv_show_time_recipes       = (TextView)view.findViewById(R.id.txv_show_time_recipes);
 
         //Get data
         recipes_detail = mDetailActivity.getRecipes();
@@ -63,6 +65,8 @@ public class DetailRecipesFragment extends Fragment{
             Glide.with(view).load(recipes_detail.getImageMain()).into(image_detail_recipes);
             txv_show_title_recipes.setText(recipes_detail.getRecipesTitle());
             txv_show_content_recipes.setText(recipes_detail.getRecipesContent());
+            String s = "Thời gian thực hiện: <b>" + recipes_detail.getTime() + " phút</b>";
+            txv_show_time_recipes.setText(HtmlCompat.fromHtml(s, HtmlCompat.FROM_HTML_MODE_LEGACY));
         }
         else{
             return;

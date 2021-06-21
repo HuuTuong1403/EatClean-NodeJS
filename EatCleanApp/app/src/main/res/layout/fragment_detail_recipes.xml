@@ -13,13 +13,6 @@
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-        <!--<RatingBar
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:numStars="5"
-            android:stepSize="0.5"
-            style="?android:attr/ratingBarStyleIndicator"
-            android:isIndicator="true"/>-->
         
         <com.makeramen.roundedimageview.RoundedImageView
             android:id="@+id/image_detail_recipes"
@@ -48,6 +41,20 @@
             android:layout_marginStart="10dp"
             android:layout_marginEnd="10dp"
             android:id="@+id/txv_show_content_recipes"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Title"
+            android:textColor="@color/black"
+            android:fontFamily="@font/robotomonoregular"
+            android:textSize="15sp"
+            android:gravity="center"
+            android:layout_marginBottom="10dp"/>
+
+        <TextView
+            android:layout_marginTop="10dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:id="@+id/txv_show_time_recipes"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Title"
