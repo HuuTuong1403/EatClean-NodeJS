@@ -156,8 +156,9 @@ public class ProfileChangePassFragment extends Fragment {
             if (response.isSuccessful()){
                 JSONObject data = Jobject.getJSONObject("data");
                 Gson g = new Gson();
-                user = g.fromJson(String.valueOf(data), users.class);
-                DataLocalManager.setUser(user);
+                users usertemp = g.fromJson(String.valueOf(data), users.class);
+                usertemp.setToken(user.getToken());
+                DataLocalManager.setUser(usertemp);
                 CustomAlertActivity customAlertActivity = new CustomAlertActivity.Builder()
                         .setActivity(mSubActivity)
                         .setTitle("Thông báo")
