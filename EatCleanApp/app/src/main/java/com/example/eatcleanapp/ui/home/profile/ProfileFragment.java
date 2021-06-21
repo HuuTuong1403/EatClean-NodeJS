@@ -165,6 +165,16 @@ public class ProfileFragment extends Fragment {
                         if(mUri != null){
                             UploadAvatar();
                         }
+                        else{
+                            CustomAlertActivity customAlertActivity = new CustomAlertActivity.Builder()
+                                    .setActivity(mSubActivity)
+                                    .setTitle("Thông báo")
+                                    .setMessage("Bạn chưa chọn hình ảnh!")
+                                    .setType("error")
+                                    .Build();
+                            customAlertActivity.showDialog();
+                            loadingDialog.dismissDialog();
+                        }
                     }
                 },400);
             }
